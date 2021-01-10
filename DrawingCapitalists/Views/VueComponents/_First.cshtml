@@ -1,0 +1,39 @@
+﻿<template id="first">
+    <div>
+        ЕБАААААААААААААААААААААААААААААААААААААААААААААААААААА {{message}}
+        <input v-model="message">
+        <button v-on:click="send2">Отправить</button>
+        <button v-on:click="send3">test</button>
+    </div>
+</template>
+
+<script>
+    Vue.component('First', {
+        template: '#first',
+        data: function () {
+            return {
+                message: 'Привет, Vue!'
+            }
+        },
+        methods: {
+            send2: function () {
+                axios.post('/Authentication/Login', { FingerPrint: 'asd', Name: this.message }).
+                    then(response => {                        
+                        console.log(response);
+                    })
+                    .catch(error => {
+                        console.log(error.response.data);
+                    })
+            },
+            send3: function () {
+                axios.get('/Vue/Index2').
+                    then(response => {
+                        console.log(response);
+                    })
+                    .catch(error => {
+                        console.log(error.response.data);
+                    })
+            }
+        }
+    })
+</script>

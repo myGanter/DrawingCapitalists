@@ -1,0 +1,20 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <div id="fprint"></div>
+    <h1 class="display-4">Welcome</h1>
+    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+</div>
+
+<script>
+    var fp = new Fingerprint({
+        canvas: true,
+        ie_activex: true,
+        screen_resolution: true
+    });
+    var uid = fp.get();
+    console.log(uid);
+    document.getElementById("fprint").innerHTML = uid; 
+</script>
