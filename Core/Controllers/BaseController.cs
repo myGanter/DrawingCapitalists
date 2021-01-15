@@ -31,13 +31,13 @@ namespace Core.Controllers
             }
             catch (Exception e)
             {
-                Logger.Log(LogLevel.Error, new EventId(), GetUser().CreateContainer(null), e, (u, ex) => ex.Message);
+                LogForTryCatch(e);
 
                 return GetBadResult(msg ?? e.Message);
             }
         }
 
-        protected async Task<IActionResult> TryCatchLog(Func<Task<IActionResult>> clbk, string msg = "Ошибка :c")
+        protected async Task<IActionResult> TryCatchLogAsync(Func<Task<IActionResult>> clbk, string msg = "Ошибка :c")
         {
             try
             {
@@ -45,10 +45,27 @@ namespace Core.Controllers
             }
             catch (Exception e)
             {
-                Logger.Log(LogLevel.Error, new EventId(), GetUser().CreateContainer(null), e, (u, ex) => ex.Message);
+                LogForTryCatch(e);
 
                 return GetBadResult(msg ?? e.Message);
             }
+        }      
+        
+        private void LogForTryCatch(Exception e)
+        {            
+            Logger.WriteLog(LogLevel.Error, GetUser().CreateContainer(null, GetRequestId()), e, 
+                (u, ex) => HttpContext.Request.Host + HttpContext.Request.Path, //url
+                "BaseController.TryCatchLogAsync");
+        }
+
+        protected string GetRequestId() 
+        {
+            return Activity.Current?.Id ?? HttpContext.TraceIdentifier;
+        }
+
+        protected bool UserIsAuthenticated()
+        {
+            return User.Identity?.IsAuthenticated ?? false; 
         }
 
         protected User GetUser()

@@ -4,6 +4,8 @@
     {
         public User User { get; set; }
 
+        public string RequestId { get; set; }
+
         public object Object { get; set; }
 
         public UserObjectContainer(User user, object obj)

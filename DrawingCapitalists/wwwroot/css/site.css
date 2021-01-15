@@ -1,71 +1,307 @@
-﻿/* Please see documentation at https://docs.microsoft.com/aspnet/core/client-side/bundling-and-minification
-for details on configuring this project to bundle and minify static web assets. */
-
-a.navbar-brand {
-  white-space: normal;
-  text-align: center;
-  word-break: break-all;
+﻿.test {
+    border: 2px solid red;
 }
 
-/* Provide sufficient contrast against white background */
-a {
-  color: #0366d6;
+:root {
+    --red-col: #F78888;
+    --gold-col: #F3D250;
+    --white-col: #ECECEC;
+    --white-shadow-col: #ECECECAA;
+    --light-blue-col: #90CCF4;
+    --blue-col: #5DA2D5;
 }
 
-.btn-primary {
-  color: #fff;
-  background-color: #1b6ec2;
-  border-color: #1861ac;
+@font-face {
+    font-family: 'HachiMaruPop';
+    src: url(/fonts/HachiMaruPop-Regular.ttf);
 }
 
-.nav-pills .nav-link.active, .nav-pills .show > .nav-link {
-  color: #fff;
-  background-color: #1b6ec2;
-  border-color: #1861ac;
-}
-
-/* Sticky footer styles
--------------------------------------------------- */
-html {
-  font-size: 14px;
-}
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-.border-top {
-  border-top: 1px solid #e5e5e5;
-}
-.border-bottom {
-  border-bottom: 1px solid #e5e5e5;
-}
-
-.box-shadow {
-  box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05);
-}
-
-button.accept-policy {
-  font-size: 1rem;
-  line-height: inherit;
-}
-
-/* Sticky footer styles
--------------------------------------------------- */
-html {
-  position: relative;
-  min-height: 100%;
+html, body, #app {
+    height: 100%;
 }
 
 body {
-  /* Margin bottom by footer height */
-  margin-bottom: 60px;
+    font-family: 'HachiMaruPop' !important;
+    background: linear-gradient(-90deg, rgba(0,0,0,.05) 1px, transparent 1px), linear-gradient(rgba(0,0,0,.05) 1px, transparent 1px), linear-gradient(-90deg, rgba(0, 0, 0, .04) 1px, transparent 1px), linear-gradient(rgba(0,0,0,.04) 1px, transparent 1px), linear-gradient(transparent 3px, #f2f2f2 3px, #f2f2f2 78px, transparent 78px), linear-gradient(-90deg, #aaa 1px, transparent 1px), linear-gradient(-90deg, transparent 3px, #f2f2f2 3px, #f2f2f2 78px, transparent 78px), linear-gradient(#aaa 1px, transparent 1px), #f2f2f2;
+    background-size: 8px 8px, 8px 8px, 80px 80px, 80px 80px, 80px 80px, 80px 80px, 80px 80px, 80px 80px;
 }
-.footer {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  white-space: nowrap;
-  line-height: 60px; /* Vertically center the text there */
+
+.max-height {
+    height: 100%;
+}
+.vertical-center {
+    position: relative;
+    top: 50%;
+    transform: translateY(-50%);
+}
+.horizontal-center {
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+}
+.mrg-10 {
+    margin: 10px 0 10px 0;
+}
+
+.ava {
+    height: 200px;
+    width: 200px;
+    left: calc(50% - 100px);
+}
+.ava img {
+    width: 100%;
+    height: 100%
+}
+
+.min-block {
+    box-shadow: 0px 0px 0px 1px black;
+    -webkit-transition: All 0.3s ease;
+    position: relative;
+    background-color: Transparent;
+}
+.min-block:hover {
+    box-shadow: 0px 0px 0px 2px black;
+}
+
+.pic-container {
+    width: 408px;
+    height: 408px;
+    border: 4px dotted var(--light-blue-col);
+}
+
+
+/*окно*/
+.bounce-enter-active {
+    animation: bounce-in .5s;
+}
+
+.bounce-leave-active {
+    animation: bounce-in .5s reverse;
+}
+
+@keyframes bounce-in {
+    0% {
+        left: -500%;
+    }
+
+    100% {
+        left: 50%;
+        transform: translateY(-50%) translateX(-50%);        
+    }
+}
+
+.min-window {
+    background-color: var(--white-shadow-col);
+    z-index: 100;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%) translateX(-50%);
+    left: 50%;
+}
+.min-window-close {
+    float: right;
+    margin: 12px;
+}
+.min-window-header {
+    display: inline-block;
+    width: 100%;
+}
+
+
+/*скролл бар*/
+::-webkit-scrollbar-button {
+    background-image: url('');
+    background-repeat: no-repeat;
+    width: 5px;
+    height: 0px;
+}
+
+::-webkit-scrollbar-track {
+    background-color: var(--white-col);
+}
+
+::-webkit-scrollbar-thumb {
+    -webkit-border-radius: 0px;
+    border-radius: 0px;
+    background-color: black;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: black;
+}
+
+::-webkit-resizer {
+    background-image: url('');
+    background-repeat: no-repeat;
+    width: 4px;
+    height: 0px;
+}
+
+::-webkit-scrollbar {
+    width: 5px;
+}
+
+/*кнопки*/
+.min-btn {
+    font-family: 'HachiMaruPop';
+    font-size: 14pt;
+    min-height: 32pt;
+    border: 1px solid black;
+    background-color: Transparent;
+    outline: none !important;
+    position: relative;
+    text-align: center;
+}
+.min-btn-45, .min-btn-30 {
+    min-height: 0px;
+    padding: 0;
+}
+.min-btn-45 {
+    width: 45px;
+    height: 45px;
+}
+.min-btn-30 {
+    width: 30px;
+    height: 30px;
+}
+.min-btn-45 svg {
+    width: 30px;
+    height: 30px;
+}
+.min-btn-30 svg {
+    width: 25px;
+    height: 25px;
+}
+.min-btn:before {
+    left: -7px;
+    top: -7px;
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 100%;    
+    z-index: -2;
+    -webkit-transition: All 0.1s ease;
+}
+.min-btn:hover:before {
+    left: -10px;
+    top: -10px;
+}
+.min-btn:active:before {
+    left: 0px;
+    top: 0px;
+}
+
+.min-btn-red:before {
+    background: var(--red-col);
+}
+.min-btn-red:hover:before {
+    background: #F3B7C2;
+}
+
+.min-btn-gold:before {
+    background: var(--gold-col);
+}
+.min-btn-gold:hover:before {
+    background: #F9E69D;
+}
+
+.min-btn-blue:before {
+    background: var(--light-blue-col);
+}
+.min-btn-blue:hover:before {
+    background: #C1E3FA;
+}
+
+
+/*текст боксы*/
+.min-tbox {
+    position: relative;
+}
+.min-tbox input[type="text"], .min-tbox textarea {
+    font-family: 'HachiMaruPop';
+    font-size: 11pt;
+    min-height: 20pt;
+    border: 1px solid black;
+    background-color: Transparent;
+    outline: none;
+    width: 100%;
+}
+.min-tbox input[type="text"] {
+    text-align: center;
+}
+.min-tbox:before, .min-tbox:after {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: -2;
+    -webkit-transition: All 0.1s ease;
+}
+.min-tbox:before {
+    left: -7px;
+    top: -7px;
+}
+.min-tbox:after {
+    left: 7px;
+    top: 7px;
+}
+.min-tbox:hover:before {
+    left: -10px;
+    top: -10px;
+}
+.min-tbox:active:before {
+    left: 0px;
+    top: 0px;
+}
+.min-tbox:hover:after {
+    left: 10px;
+    top: 10px;
+}
+.min-tbox:active:after {
+    left: 0px;
+    top: 0px;
+}
+
+.min-tbox-red:before, .min-tbox-red:after {
+    background: var(--red-col);
+}
+.min-tbox-red:hover:before, .min-tbox-red:hover:after {
+    background: #F3B7C2;
+}
+
+.min-tbox-gold:before, .min-tbox-gold:after {
+    background: var(--gold-col);
+}
+.min-tbox-gold:hover:before, .min-tbox-gold:hover:after {
+    background: #F9E69D;
+}
+
+.min-tbox-blue:before, .min-tbox-blue:after {
+    background: var(--light-blue-col);
+}
+.min-tbox-blue:hover:before, .min-tbox-blue:hover:after {
+    background: #C1E3FA;
+}
+
+
+/*крест*/
+.cross:after, .cross:before {
+    position: absolute;
+    content: "";
+    border: 1px solid black;
+    z-index: -1;
+}
+
+.cross:after {
+    width: 150%;
+    border-bottom: none;
+    left: -25%;
+    top: 50%;
+}
+
+.cross:before {
+    height: 180%;
+    border-left: none;
+    left: 50%;
+    top: -40%;
 }

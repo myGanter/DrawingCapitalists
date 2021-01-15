@@ -12,14 +12,14 @@ namespace Core.Services
 {
     public class DBLogger : ILogger
     {
-        private object State { get; set; }
+        private object ScopeState { get; set; }
 
         public IDisposable BeginScope<TState>(TState state)
         {
-            State = state;
+            ScopeState = state;
 
             var scope = new DBLoggerScope();
-            scope.OnDispose += () => State = null;
+            scope.OnDispose += () => ScopeState = null;
 
             return scope;
         }
@@ -38,14 +38,20 @@ namespace Core.Services
                 Message = formatter(state, exception)
             };
 
-            if (State.IsNotNull())
-                log.Context = State.ToString();
+            if (ScopeState.IsNotNull())
+                log.Context = ScopeState.ToString();
 
-            if (state is UserObjectContainer us)            
+            if (state is UserObjectContainer us)
+            {
                 log.User = us.User;
+                log.RequestId = us.RequestId;
+            }          
 
             if (exception.IsNotNull())
-                log.StackTrace = exception.StackTrace;            
+            {
+                log.StackTrace = exception.StackTrace;
+                log.ExceptionMessage = $"{exception.Message} \nInnerException:[{exception.InnerException?.Message}]";
+            }
 
             DBLoggerQueue.Add(log);
         }

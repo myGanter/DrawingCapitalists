@@ -1,20 +1,47 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
-}
+﻿@model VueConfig
 
-<div class="text-center">
-    <div id="fprint"></div>
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div id="app">
+    <transition name="component-fade" mode="out-in">
+        <component v-bind:is="currentView"></component>
+    </transition>
+
+    <div class="hide" id="pages"></div>
 </div>
 
+<script src="~/js/vue-app.js"></script>
+
 <script>
-    var fp = new Fingerprint({
-        canvas: true,
-        ie_activex: true,
-        screen_resolution: true
-    });
-    var uid = fp.get();
-    console.log(uid);
-    document.getElementById("fprint").innerHTML = uid; 
+    app.switchPage('@Model.FirstPage');
+</script>
+
+<template id="min-window">
+    <transition name="bounce">
+        <div v-show="isOpen" class="min-block min-window">
+            <div class="min-window-header">
+                <button v-on:click="onCloseClick" class="min-btn min-btn-red min-btn-30 min-window-close">
+                    <svg xmlns="http://www.w3.org/2000/svg" style="margin: -6px 0 0 1px;" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
+                        <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z" />
+                    </svg>
+                    <div class="cross"></div>
+                </button>
+            </div>
+            <slot></slot>            
+        </div>
+    </transition>
+</template>
+<script>
+    Vue.component('minwindow', {
+        template: '#min-window',
+        props: {
+            isOpen: Boolean,
+            onCloseClickClbk: Function
+        },
+        methods: {
+            onCloseClick: function () {
+
+                if (this.onCloseClickClbk)
+                    this.onCloseClickClbk();
+            }
+        }
+    })
 </script>

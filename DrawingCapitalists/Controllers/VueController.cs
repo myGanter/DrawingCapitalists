@@ -1,17 +1,20 @@
-﻿using DrawingCapitalists.Models;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 using Core.Controllers;
 using Core.Services.VueApp;
 using Core.Services.DB.Actions;
+using Core.Services.DB;
 using Core.Expansions;
-using Microsoft.AspNetCore.Authorization;
+using Core.Models;
+
+using DrawingCapitalists.Models;
 
 namespace DrawingCapitalists.Controllers
 {
@@ -21,6 +24,8 @@ namespace DrawingCapitalists.Controllers
 
         private readonly ActionsBuilder Builder;
 
+        private AppDBContext DBContext => Builder.Context;
+
         public VueController(ILogger<VueController> logger, VueTemplateService templateService, ActionsBuilder builder) : base(logger)
         {       
             TemplateService = templateService;
@@ -28,36 +33,53 @@ namespace DrawingCapitalists.Controllers
         }        
 
         [HttpGet]
-        public async Task<IActionResult> Index(string page)
+        public IActionResult Index(string page, bool useLayout = true)
         {
-            await Builder.GetUserStateActions.TransactionAsync(async () => 
+            return TryCatchLog(() => 
             {
-                var o = await Builder.GetUserStateActions.GetAsync("test", "test2");
-                if (o.IsNull())
-                    await Builder.GetUserStateActions.AddAsync(new Core.Models.DB.UserState() { FingerPrint = "test2", Name = "test" });
-            });
+                Logger.WriteLog(LogLevel.Information, GetUser().CreateContainer(null, GetRequestId()), null,
+                    (x, ex) => $"page = {page}; useLayout = {useLayout}",
+                    "VueController.Index");
 
-            Logger.LogWarning("test", "1", "2");
+                if (UserIsAuthenticated())
+                {
+                    if (useLayout)
+                        return View(new VueConfig()
+                        {
+                            FirstPage = page.IsNullOrEmpty() ? "Login" : page//todo заменить логин на первую страницу
+                        }); 
 
-            if (page == null)
-                return View();
+                    var normPageName = TemplateService.NormalizeTemplateName(page);
+                    if (!TemplateService.TemplateExist(normPageName))
+                    {
+                        var msg = $"Страницы {page} не существует";
 
-            var newName = "_" + page;
+                        Logger.WriteLog(LogLevel.Warning, GetUser().CreateContainer(null, GetRequestId()), null,
+                            (x, ex) => msg,
+                            "VueController.Index");
 
-            return PartialView("~/Views/VueComponents/" + newName + ".cshtml");
-        }
+                        return GetBadResult(msg);
+                    }
 
-        [Authorize]
-        [HttpGet]
-        public IActionResult Index2()
-        {       
-            return Ok();
+                    return PartialView(TemplateService.GetComponentPath(normPageName));
+                }
+                else if (!page.IsNullOrEmpty() && !useLayout)
+                {
+                    return PartialView(TemplateService.GetComponentPath("_Login"));
+                }
+
+                return View(new VueConfig() 
+                {
+                    FirstPage = "Login"
+                });
+            });            
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            //return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            return GetBadResult("Произошло что-то очень плохое :c");
         }
     }
 }

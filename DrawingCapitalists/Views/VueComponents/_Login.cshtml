@@ -1,0 +1,234 @@
+﻿<template id="login">
+    <div class="max-height">
+
+        <minwindow v-bind:is-open="isShowAvaEditor" v-bind:on-close-click-clbk="onAvaEditorCloseClick">
+            <div class="container">
+                <div class="row">   
+                    <div class="col-sm">
+                        <div class="pic-container">
+                            <canvas ref="canvas" 
+                                    v-on:mouseout="onCanvasUp" 
+                                    v-on:mousedown="onCanvasClick" 
+                                    v-on:mousemove="onCanvasMove" 
+                                    v-on:mouseup="onCanvasUp" 
+                                    width="400" height="400">
+                            </canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mrg-10">
+                    <div class="col-sm">
+                    </div>
+                    <div class="col-sm">
+                        <button v-on:click="onOkAvaEditor" class="min-btn min-btn-gold mrg-10 horizontal-center">
+                            Окей
+                            <div class="cross"></div>
+                        </button>
+                    </div>
+                    <div class="col-sm">                        
+                    </div>
+                </div>
+            </div>
+        </minwindow>
+
+        <div class="container vertical-center">
+            <div class="row">
+                <div class="col-sm">
+                </div>
+                <div class="col-sm-4">
+                    <div class="min-block ava">
+                        <img v-on:click="onAvaClick" v-bind:src="base64Ava == null ? '/images/ava.png' : base64Ava">
+                    </div>
+                    <input id="file-input" v-show="false" type="file" accept=".jpg,.png,.gif" />
+                </div>
+                <div class="col-sm">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm">
+                </div>
+                <div class="col-sm-4">
+                    <div class="min-tbox min-tbox-red mrg-10">
+                        <input v-model="name" v-on:keyup.enter="onLoginClick" type="text" placeholder="Назовитесь" />
+                    </div>
+                </div>
+                <div class="col-sm-1">
+                    <button class="min-btn min-btn-gold min-btn-45" v-on:click="onLoginClick">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-brush" viewBox="0 0 16 16">
+                            <path d="M15.825.12a.5.5 0 0 1 .132.584c-1.53 3.43-4.743 8.17-7.095 10.64a6.067 6.067 0 0 1-2.373 1.534c-.018.227-.06.538-.16.868-.201.659-.667 1.479-1.708 1.74a8.117 8.117 0 0 1-3.078.132 3.658 3.658 0 0 1-.563-.135 1.382 1.382 0 0 1-.465-.247.714.714 0 0 1-.204-.288.622.622 0 0 1 .004-.443c.095-.245.316-.38.461-.452.393-.197.625-.453.867-.826.094-.144.184-.297.287-.472l.117-.198c.151-.255.326-.54.546-.848.528-.739 1.2-.925 1.746-.896.126.007.243.025.348.048.062-.172.142-.38.238-.608.261-.619.658-1.419 1.187-2.069 2.175-2.67 6.18-6.206 9.117-8.104a.5.5 0 0 1 .596.04zM4.705 11.912a1.23 1.23 0 0 0-.419-.1c-.247-.013-.574.05-.88.479a11.01 11.01 0 0 0-.5.777l-.104.177c-.107.181-.213.362-.32.528-.206.317-.438.61-.76.861a7.127 7.127 0 0 0 2.657-.12c.559-.139.843-.569.993-1.06a3.121 3.121 0 0 0 .126-.75l-.793-.792zm1.44.026c.12-.04.277-.1.458-.183a5.068 5.068 0 0 0 1.535-1.1c1.9-1.996 4.412-5.57 6.052-8.631-2.591 1.927-5.566 4.66-7.302 6.792-.442.543-.796 1.243-1.042 1.826a11.507 11.507 0 0 0-.276.721l.575.575zm-4.973 3.04l.007-.005a.031.031 0 0 1-.007.004zm3.582-3.043l.002.001h-.002z" />
+                        </svg>
+                        <div class="cross"></div>
+                    </button>
+                </div>
+                <div class="col-sm-3">
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<script>
+    Vue.component('Login', {
+        template: '#login',
+        data: function () {
+            return {
+                base64Ava: null,
+                avaEditorImg: null,
+                canvas: null,
+                cnvContext: null,
+                name: null,
+                isShowAvaEditor: false,
+                isCanvasMouseDown: false,
+                pastX: 0,
+                pastY: 0,
+                countX: 0,
+                countY: 0
+            }
+        },
+        mounted() {
+            $("#file-input").off();
+            $("#file-input").on("change", (evt) => {
+                var el = evt.target;
+
+                if (el.files != null && el.files.length > 0) {
+                    var file = el.files[0];
+
+                    var reader = new FileReader();
+                    reader.onload = () => {                        
+                        var dataURL = reader.result;
+
+                        var loadImg = new Image();
+                        loadImg.onload = () => {
+
+                            this.avaEditorImg = new Image();
+
+                            this.avaEditorImg.onload = () => {
+
+                                this.drawImgOnCanvas(0, 0);
+                                this.isShowAvaEditor = true;
+                            };
+
+                            this.avaEditorImg.src = this.getScaleImg(loadImg);                            
+                        };
+
+                        loadImg.src = dataURL;                                            
+                    };
+
+                    reader.readAsDataURL(file);
+                } 
+            });
+
+            this.canvas = this.$refs.canvas;
+            this.cnvContext = this.canvas.getContext("2d");
+        },
+        methods: {
+            drawImgOnCanvas: function (x, y) {
+                var g = this.cnvContext;
+                var img = this.avaEditorImg;
+                var w = img.width;
+                var h = img.height;                
+
+                g.clearRect(0, 0, 400, 400);
+
+                if (w > h) {
+                    g.drawImage(img, Math.round(w / 2) - 200 + x, 0, 400, 400, 0, 0, 400, 400);
+                }
+                else {
+                    g.drawImage(img, 0, Math.round(h / 2) - 200 + y, 400, 400, 0, 0, 400, 400);
+                }                
+            },
+            getScaleImg: function (img) {
+                var w = img.width;
+                var h = img.height;
+                var nw = 0;
+                var nh = 0;
+                var canvas = document.createElement('canvas');
+                if (w > h) {
+                    nh = 400;
+                    nw = Math.round(w * nh / h);
+                }
+                else {
+                    nw = 400;
+                    nh = Math.round(h * nw / w);
+                }
+
+                canvas.width = nw;
+                canvas.height = nh;
+
+                var ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, nw, nh);
+
+                var data = canvas.toDataURL();
+
+                return data;
+            },
+            onOkAvaEditor: function () {
+
+                var data = this.canvas.toDataURL();
+                this.base64Ava = data;
+                this.isShowAvaEditor = false;
+            },
+            onCanvasClick: function (e) {
+                this.pastX = e.offsetX;
+                this.pastY = e.offsetY;
+                this.isCanvasMouseDown = true;            
+            },
+            onCanvasMove: function (e) {
+                if (this.isCanvasMouseDown) {
+
+                    var img = this.avaEditorImg;
+                    var w = img.width;
+                    var h = img.height;   
+                    var x = e.offsetX;
+                    var y = e.offsetY;
+                    var offx = this.pastX - x;
+                    var offy = this.pastY - y;
+
+                    if (w / 2 + 200 + Math.abs(this.countX + offx) < w ||
+                        h / 2 + 200 + Math.abs(this.countY + offy) < h) {
+                        if (w != 400)
+                            this.countX += offx;
+                        if (h != 400)
+                            this.countY += offy;
+
+                        this.drawImgOnCanvas(this.countX, this.countY);
+                    }                    
+
+                    this.pastX = x;
+                    this.pastY = y;
+                }
+            },
+            onCanvasUp: function (e) {
+                this.isCanvasMouseDown = false;
+            },
+            onAvaEditorCloseClick: function () {
+                this.isShowAvaEditor = false;
+            },
+            onAvaClick: function () {
+                this.pastX = 0;
+                this.pastY = 0;
+                this.countX = 0;
+                this.countY = 0;
+
+                var fileInput = $("#file-input");
+                fileInput.val(null);
+                fileInput.click();
+            },
+            getFingerPrint: function () {
+                var fp = new Fingerprint({
+                    canvas: true,
+                    ie_activex: true,
+                    screen_resolution: true
+                });
+
+                var uid = fp.get();
+
+                return uid;
+            },
+            onLoginClick: function () {
+                
+                alert(this.name + this.getFingerPrint());
+            }
+        }        
+    })
+</script>

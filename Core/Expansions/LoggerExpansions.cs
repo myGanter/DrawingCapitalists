@@ -16,6 +16,12 @@ namespace Core.Expansions
             return factory;
         }
 
+        public static void WriteLog<TState>(this ILogger logger, LogLevel logLevel, TState state, Exception exception, Func<TState, Exception, string> formatter, object scopeState)
+        {
+            using (logger.BeginScope(scopeState))
+                logger.Log(logLevel, new EventId(), state, exception, formatter);
+        }
+
         public static void WriteLog<TState>(this ILogger logger, LogLevel logLevel, TState state, Exception exception, Func<TState, Exception, string> formatter)
         {
             logger.Log(logLevel, new EventId(), state, exception, formatter);

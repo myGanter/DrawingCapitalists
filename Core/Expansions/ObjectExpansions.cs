@@ -30,9 +30,9 @@ namespace Core.Expansions
             return JsonConvert.SerializeObject(obj);
         }
 
-        public static UserObjectContainer CreateContainer(this User us, object obj)
+        public static UserObjectContainer CreateContainer(this User us, object obj, string requestId = null)
         {
-            return new UserObjectContainer(us, obj);
+            return new UserObjectContainer(us, obj) { RequestId = requestId };
         }
     }
 }

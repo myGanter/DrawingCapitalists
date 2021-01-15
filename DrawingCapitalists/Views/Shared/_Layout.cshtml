@@ -3,38 +3,18 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - DrawingCapitalists</title>
+    <title>-_-</title>
 
     <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <script src="~/lib/fingerprint/fingerprint.js"></script>
     <script src="~/lib/axios/axios.min.js"></script>
     <script src="~/lib/vue/vue.min.js"></script>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
 </head>
 <body>
-    
-    <div id="app">
-        {{viewName}}
 
-        <input v-model="viewName">
-        <button v-on:click="send">Отправить</button>
+    @RenderBody()   
 
-        <transition name="component-fade" mode="out-in">
-            <component v-bind:is="currentView"></component>
-        </transition>
-
-        <ul id="example-1">
-            <li v-for="item in views" v-on:click="swich(item)">
-                {{ item }}
-            </li>
-        </ul>
-
-        <div id="comps"></div>
-
-        @RenderBody()
-    </div>
-        
-    <script src="~/js/vue-app.js"></script>
-    
 </body>
 </html>

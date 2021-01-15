@@ -37,8 +37,8 @@ namespace DrawingCapitalists
         {
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options => 
-                {
-                    options.LoginPath = new PathString("/");
+                {                    
+                    //options.LoginPath = new PathString("/");
                 });
 
             var diConf = new NinjectConfigure();
@@ -73,7 +73,7 @@ namespace DrawingCapitalists
             }
             else
             {
-                app.UseExceptionHandler("/Home/Error");
+                app.UseExceptionHandler("/Vue/Error");
                 app.UseHsts();
             }
 

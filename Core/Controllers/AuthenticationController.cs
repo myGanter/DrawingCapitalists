@@ -31,12 +31,15 @@ namespace Core.Controllers
         [HttpPost]
         public async Task<IActionResult> Login([FromBody] AuthenticateDTO data)
         {
-            return await TryCatchLog(async () => 
+            return await TryCatchLogAsync(async () => 
             {
                 var modelErrors = GetModelErrorsOrNull();
                 if (modelErrors.IsNotNull())
                 {
-                    Logger.WriteLog(LogLevel.Warning, GetUser().CreateContainer(data), null, (o, e) => $"AuthenticateDTO не валидна.\n {o.Object.JsonSerialize()}");
+                    Logger.WriteLog(LogLevel.Warning, GetUser().CreateContainer(data), null, 
+                        (o, e) => $"AuthenticateDTO не валидна.\n {o.Object.JsonSerialize()}", 
+                        "AuthenticationController.Login");
+
                     return GetBadResult(modelErrors);
                 }
 
@@ -50,9 +53,27 @@ namespace Core.Controllers
 
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(id));
 
-                await Builder.GetUserStateActions.AddAsync(new UserState() { Ip = GetUser().Ip, FingerPrint = data.FingerPrint, Name = data.Name, LoginTime = DateTime.Now });
+                var userContext = await Builder.GetUserStateActions.GetAsync(data.Name, data.FingerPrint);
+                if (userContext.IsNotNull())
+                {
+                    userContext.LoginTime = DateTime.Now;
 
-                Logger.WriteLog(LogLevel.Information, GetUser().CreateContainer(data), null, (o, e) => $"Успешная аутентификация.\n {o.Object.JsonSerialize()}");
+                    await DBContext.SaveChangesAsync();
+                }
+                else
+                {
+                    await Builder.GetUserStateActions.AddAsync(new UserState() 
+                    { 
+                        Ip = GetUser().Ip, 
+                        FingerPrint = data.FingerPrint, 
+                        Name = data.Name, 
+                        LoginTime = DateTime.Now 
+                    });
+                }                
+
+                Logger.WriteLog(LogLevel.Information, GetUser().CreateContainer(data), null, 
+                    (o, e) => $"Успешная аутентификация.\n {o.Object.JsonSerialize()}", 
+                    "AuthenticationController.Login");
 
                 return Ok();
             });            
@@ -62,7 +83,7 @@ namespace Core.Controllers
         [HttpGet]
         public async Task<IActionResult> Logout()
         {
-            return await TryCatchLog(async () =>
+            return await TryCatchLogAsync(async () =>
             {
                 var user = GetUser();                
 
@@ -77,7 +98,9 @@ namespace Core.Controllers
                     await DBContext.SaveChangesAsync();
                 }
 
-                Logger.WriteLog(LogLevel.Information, user.CreateContainer(null), null, (o, e) => "Сделал Logout.");
+                Logger.WriteLog(LogLevel.Information, user.CreateContainer(null), null, 
+                    (o, e) => "Сделал Logout.", 
+                    "AuthenticationController.Logout");
 
                 return Ok();
             });

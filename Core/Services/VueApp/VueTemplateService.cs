@@ -26,9 +26,9 @@ namespace Core.Services.VueApp
             return "_" + templateName;
         }
 
-        public string GetComponentPath(string templateName)
+        public string GetComponentPath(string normalizeTemplateName)
         {
-            return $"~/Views/VueComponents/{templateName}.cshtml";
+            return $"~/Views/{VueDir}/{normalizeTemplateName}.cshtml";
         }
 
         public bool TemplateExist(string normalizeTemplateName)
