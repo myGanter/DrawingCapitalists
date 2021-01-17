@@ -12,5 +12,7 @@ namespace Core.Services.DB
         DbSet<Log> Logs { get; set; }
 
         DbSet<UserState> UserStates { get; set; }
+
+        DbSet<UserConfigure> UserConfigures { get; set; }
     }
 }

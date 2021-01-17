@@ -20,5 +20,9 @@ namespace Core.Models.DB
         public DateTime? LogoutTime { get; set; }
 
         public bool IsActive { get; set; }
+
+        public int? UserConfigureId { get; set; }
+
+        public UserConfigure UserConfigure { get; set; }
     }
 }

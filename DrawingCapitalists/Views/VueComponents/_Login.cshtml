@@ -223,11 +223,25 @@
 
                 var uid = fp.get();
 
-                return uid;
+                return uid + '';
             },
             onLoginClick: function () {
-                
-                alert(this.name + this.getFingerPrint());
+                var fPrint = this.getFingerPrint();
+                var name = this.name;
+
+                app.httpPost('/Authentication/Login',
+                    { fingerPrint: fPrint, name: name },
+                    response => {                        
+
+                        if (this.base64Ava != null) {
+                            app.httpPost('/Authentication/SetAvatar',
+                                { base64Ava: this.base64Ava },
+                                avResponse => {
+                                    app.switchPage("Hub");
+                                });
+                        }                       
+
+                    });                
             }
         }        
     })

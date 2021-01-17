@@ -46,7 +46,7 @@ namespace DrawingCapitalists.Controllers
                     if (useLayout)
                         return View(new VueConfig()
                         {
-                            FirstPage = page.IsNullOrEmpty() ? "Login" : page//todo заменить логин на первую страницу
+                            FirstPage = page.IsNullOrEmpty() ? "Hub" : page
                         }); 
 
                     var normPageName = TemplateService.NormalizeTemplateName(page);

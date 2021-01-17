@@ -13,6 +13,8 @@ namespace Core.Services.DB
 
         public DbSet<UserState> UserStates { get; set; }
 
+        public DbSet<UserConfigure> UserConfigures { get; set; }
+
         public AppDBContext(DbContextOptions options) : base(options)
         { }
     }

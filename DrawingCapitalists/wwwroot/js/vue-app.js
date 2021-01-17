@@ -7,7 +7,7 @@
     methods: {
         switchPage: function (page) {
             if (!this.views.includes(page)) {
-                this.httpGet(`/?page=${page}&useLayout=false`,
+                this.httpGet(`/${page}?useLayout=false`,
                     response => {
                         //console.log(response);
                         $("#pages").append(response.data);
@@ -30,8 +30,8 @@
                     if (catchClbk)
                         catchClbk(error);
 
-                    if (error.data)
-                        showClientMessage(error.data);
+                    if (error.response.data)
+                        this.showClientMessage(error.response.data);
                 });
         },
         httpPost: function (url, obj, thenClbk, catchClbk) {
@@ -43,15 +43,16 @@
                     if (catchClbk)
                         catchClbk(error);
 
-                    if (error.data)
-                        showClientMessage(error.data);
+                    if (error.response.data)
+                        this.showClientMessage(error.response.data);
                 })
         },
         showClientMessage: function (data) {
             var str = "";
 
-            for (var i in data.Messages)
-                str += i + "\n";
+            for (var i = 0; i < data.messages.length; ++i) {                
+                str += data.messages[i] + "\n";
+            }
 
             alert(str);
         },

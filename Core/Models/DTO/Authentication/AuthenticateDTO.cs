@@ -10,8 +10,9 @@ namespace Core.Models.DTO.Authentication
     {
         [Required(ErrorMessage = "Ошибка :c")]
         public string FingerPrint { get; set; }
-
+        
         [Required(ErrorMessage = "Вас нужно как-то назвать")]
+        [StringLength(20, MinimumLength = 3, ErrorMessage = "Серверу не понравилась длинна имени")]
         public string Name { get; set; }
     }
 }

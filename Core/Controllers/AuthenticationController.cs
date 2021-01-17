@@ -14,6 +14,7 @@ using Core.Models.DB;
 using Core.Services.DB.Actions;
 using Core.Services.DB;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 
 namespace Core.Controllers
 {
@@ -36,7 +37,7 @@ namespace Core.Controllers
                 var modelErrors = GetModelErrorsOrNull();
                 if (modelErrors.IsNotNull())
                 {
-                    Logger.WriteLog(LogLevel.Warning, GetUser().CreateContainer(data), null, 
+                    Logger.WriteLog(LogLevel.Warning, GetUser().CreateContainer(data, GetRequestId()), null, 
                         (o, e) => $"AuthenticateDTO не валидна.\n {o.Object.JsonSerialize()}", 
                         "AuthenticationController.Login");
 
@@ -71,7 +72,7 @@ namespace Core.Controllers
                     });
                 }                
 
-                Logger.WriteLog(LogLevel.Information, GetUser().CreateContainer(data), null, 
+                Logger.WriteLog(LogLevel.Information, GetUser().CreateContainer(data, GetRequestId()), null, 
                     (o, e) => $"Успешная аутентификация.\n {o.Object.JsonSerialize()}", 
                     "AuthenticationController.Login");
 
@@ -98,12 +99,52 @@ namespace Core.Controllers
                     await DBContext.SaveChangesAsync();
                 }
 
-                Logger.WriteLog(LogLevel.Information, user.CreateContainer(null), null, 
+                Logger.WriteLog(LogLevel.Information, user.CreateContainer(null, GetRequestId()), null, 
                     (o, e) => "Сделал Logout.", 
                     "AuthenticationController.Logout");
 
                 return Ok();
             });
+        }
+
+        [RequestSizeLimit(2097152)]
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> SetAvatar([FromBody] AvatarDTO ava)
+        {
+            return await TryCatchLogAsync(async () =>
+            {
+                var user = GetUser();
+                var userState = await Builder.GetUserStateActions.GetAsync(user.Name, user.FingerPrint);
+                int? saveIndex = null;
+
+                if (userState.IsNotNull())
+                {
+                    userState.UserConfigure = new UserConfigure()
+                    {
+                        Base64Ava = ava.Base64Ava
+                    };
+
+                    await DBContext.SaveChangesAsync();
+
+                    saveIndex = userState.UserConfigure.Id;
+                }
+
+                Logger.WriteLog(LogLevel.Information, user.CreateContainer(saveIndex, GetRequestId()), null,
+                    (o, e) => $"UserConfigureId = {o.Object}",
+                    "AuthenticationController.SetAvatar");
+
+                return Ok();
+            });
+        }
+
+        public async Task<IActionResult> Test()
+        {
+            var user = GetUser();
+            var h = await DBContext.UserStates.Include(x => x.UserConfigure).FirstOrDefaultAsync(x => x.Name == user.Name && x.FingerPrint == user.FingerPrint);
+            var h2 = await DBContext.UserConfigures.Include(x => x.UserState).ToListAsync();
+
+            return Ok();
         }
     }
 }
