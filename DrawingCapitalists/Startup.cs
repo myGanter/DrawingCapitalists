@@ -21,6 +21,9 @@ using Core.Expansions;
 using Core.Services.DI;
 using Core.Models;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Core.Services.Hubs;
+using Microsoft.AspNetCore.SignalR;
+using Core.Services.AppState;
 
 namespace DrawingCapitalists
 {
@@ -56,14 +59,20 @@ namespace DrawingCapitalists
 
             services.AddSignalR();
 
+            services.AddSingleton<IUserIdProvider, UserIdPrivider>();
+
             services.AddScoped<ActionsBuilder>();
 
             services.AddSingleton<VueTemplateService>();
 
+            var appObjects = new AppObjects();
+            services.AddSingleton(appObjects);
+            diConf.AddTypeConfig(c => c.Bind<AppObjects>().ToConstant(appObjects));
+
             services.AddSingleton<IKernel>(sp => new StandardKernel(diConf));
         }
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IKernel di, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IKernel di, ILoggerFactory loggerFactory, IServiceProvider serviceProvider)
         {
             loggerFactory.AddDBLogger();
 
@@ -95,13 +104,18 @@ namespace DrawingCapitalists
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller}/{action=Index}");
-            });
 
+                endpoints.MapHub<RoomsHub>("/hub/rooms");
+            });
+           
             //init db
             using (var dbinit = di.Get<DBInitializer>())
             {
                 dbinit.Initialize();
             }
+
+            //init hubs
+            HubsInitializer.InitializeContextsHub(serviceProvider); 
 
             di.Get<Core.Services.Process.ProcessController>().StartProcessor();            
         }

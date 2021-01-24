@@ -34,5 +34,10 @@ namespace Core.Expansions
         {
             return new UserObjectContainer(us, obj) { RequestId = requestId };
         }
+
+        public static UserStruct CreateUserStruct(this User user)
+        {
+            return new UserStruct(user.Name, user.FingerPrint);
+        }
     }
 }

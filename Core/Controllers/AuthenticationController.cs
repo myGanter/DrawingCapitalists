@@ -7,14 +7,15 @@ using Microsoft.Extensions.Logging;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 
 using Core.Expansions;
 using Core.Models.DTO.Authentication;
 using Core.Models.DB;
 using Core.Services.DB.Actions;
 using Core.Services.DB;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.EntityFrameworkCore;
+using Core.Services.Authentication;
 
 namespace Core.Controllers
 {
@@ -47,7 +48,7 @@ namespace Core.Controllers
                 var claims = new List<Claim>
                 {
                     new Claim(ClaimsIdentity.DefaultNameClaimType, data.Name),
-                    new Claim(FingerPrintClaimType, data.FingerPrint)
+                    new Claim(AuthenticationHelper.FingerPrintClaimType, data.FingerPrint)
                 };
 
                 ClaimsIdentity id = new ClaimsIdentity(claims, "ApplicationCookie", ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);

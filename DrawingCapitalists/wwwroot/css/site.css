@@ -39,11 +39,29 @@ body {
     left: 50%;
     transform: translateX(-50%);
 }
+.full-center {
+    position: relative;
+    top: 50%;
+    left: 50%;
+    transform: translateY(-50%) translateX(-50%);
+}
+.pdg-10 {
+    padding: 10px 0 10px 0;
+}
+.pdg-5 {
+    padding: 5px 0 5px 0;
+}
 .mrg-10 {
     margin: 10px 0 10px 0;
 }
+.mrg-5 {
+    margin: 5px 0 5px 0;
+}
+.text-15 {
+    font-size: 15pt;
+}
 
-.hub-panel {
+.hub-panel, .lobby-users-count {
     display: flex;
     justify-content: space-around;
 }
@@ -73,6 +91,15 @@ body {
 .min-block:hover {
     box-shadow: 0px 0px 0px 2px black;
 }
+.min-block-40 {
+    width: 40px;
+    height: 40px;
+    padding: 3px;
+}
+.min-block-40 svg {
+    width: 32px;
+    height: 32px;
+}
 
 .pic-container {
     width: 408px;
@@ -80,16 +107,29 @@ body {
     border: 4px dotted var(--light-blue-col);
 }
 
+/*vue анимации*/
+.component-fade-enter-active, .component-fade-leave-active {
+    transition: opacity .3s ease;
+}
+.component-fade-enter, .component-fade-leave-to {
+    opacity: 0;
+}
+
+.no-mode-fade-enter-active, .no-mode-fade-leave-active {
+    transition: opacity .5s;
+}
+.no-mode-fade-enter, .no-mode-fade-leave-active {
+    opacity: 0;
+}
+
 
 /*окно*/
 .bounce-enter-active {
     animation: bounce-in .5s;
 }
-
 .bounce-leave-active {
     animation: bounce-in .5s reverse;
 }
-
 @keyframes bounce-in {
     0% {
         left: -500%;

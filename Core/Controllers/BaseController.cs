@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 using Core.Models;
 using Core.Expansions;
+using Core.Services.Authentication;
 using System.Security.Claims;
 
 namespace Core.Controllers
@@ -15,8 +16,6 @@ namespace Core.Controllers
     public abstract class BaseController : Controller
     {
         protected readonly ILogger Logger;
-
-        protected const string FingerPrintClaimType = "FingerPrint";
 
         public BaseController(ILogger logger)
         {
@@ -83,7 +82,7 @@ namespace Core.Controllers
             {
                 Ip = ip,
                 Name = User.Identity?.Name,
-                FingerPrint = User.Claims.FirstOrDefault(x => x.Type == FingerPrintClaimType)?.Value
+                FingerPrint = User.Claims.FirstOrDefault(x => x.Type == AuthenticationHelper.FingerPrintClaimType)?.Value
             };
         }
 

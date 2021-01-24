@@ -58,6 +58,15 @@
         },
         setLocation: function (page) {
             history.pushState(null, null, '/' + page);
+        },
+        createHubConnection: function (url) {
+            var hubConnection = new signalR.HubConnectionBuilder()
+                .withUrl(url)
+                .build();
+
+            hubConnection.on('ShowClientMessage', this.showClientMessage);
+
+            return hubConnection;
         }
     }
 })

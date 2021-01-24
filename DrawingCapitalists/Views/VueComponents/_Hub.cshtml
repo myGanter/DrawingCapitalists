@@ -1,5 +1,74 @@
 ﻿<template id="hub">
     <div class="max-height">
+
+        <minwindow v-bind:is-open="isShowLobbyCreater" v-bind:on-close-click-clbk="onLobbyCreaterCloseClick">
+            <div class="container">
+                <div class="row">
+                    <div class="col-sm"></div>
+                    <div class="col-sm-4">
+                        <div class="vertical-center"><b>Название комнаты</b></div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="min-tbox min-tbox-gold mrg-10">
+                            <input v-model="lobby.name" type="text" placeholder="123" />
+                        </div>
+                    </div>
+                    <div class="col-sm">
+                    </div>
+                </div>
+                <div class="row mrg-10">
+                    <div class="col-sm"></div>
+                    <div class="col-sm-4">
+                        <div class="vertical-center">
+                            <transition name="no-mode-fade">
+                                <div v-if="lobby.isPrivate"><b>Закрытая</b></div>
+                                <div v-else><b>Открытая</b></div>
+                            </transition>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div v-bind:style="{ background: (lobby.isPrivate ? 'var(--red-col)' : 'var(--gold-col)') }" v-on:click="onPrivateClick" class="min-block min-block-40">
+                            <svg style="margin-left: 1px;" v-if="lobby.isPrivate" xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-lock" viewBox="0 0 16 16">
+                                <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2zM5 8h6a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z" />
+                            </svg>
+                            <svg style="margin-left: 2px;" v-else xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-unlock" viewBox="0 0 16 16">
+                                <path d="M11 1a2 2 0 0 0-2 2v4a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h5V3a3 3 0 0 1 6 0v4a.5.5 0 0 1-1 0V3a2 2 0 0 0-2-2zM3 8a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1H3z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="col-sm">
+                    </div>
+                </div>
+                <transition name="no-mode-fade">
+                    <div v-if="lobby.isPrivate" class="row">
+                        <div class="col-sm"></div>
+                        <div class="col-sm-4">
+                            <div class="vertical-center"><b>Пароль</b></div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="min-tbox min-tbox-red mrg-10">
+                                <input v-model="lobby.password" type="text" placeholder="qwerty" />
+                            </div>
+                        </div>
+                        <div class="col-sm">
+                        </div>
+                    </div>
+                </transition>
+                <div class="row mrg-10">
+                    <div class="col-sm">
+                    </div>
+                    <div class="col-sm">
+                        <button v-on:click="onOkLobbyCreater" class="min-btn min-btn-blue mrg-10 horizontal-center">
+                            Окей
+                            <div class="cross"></div>
+                        </button>
+                    </div>
+                    <div class="col-sm">
+                    </div>
+                </div>
+            </div>
+        </minwindow>
+
         <div class="container vertical-center max-height">
             <div class="row" style="height: 10%">
             </div>
@@ -7,13 +76,13 @@
                 <div class="col-sm">
                 </div>
                 <div class="col-sm-7 hub-panel">
-                    <button class="min-btn min-btn-gold">
+                    <button v-on:click="onRandomLobby" class="min-btn min-btn-gold">
                         Случайная <br>
                         игра
                         <div class="cross"></div>
                     </button>
 
-                    <button class="min-btn min-btn-blue">
+                    <button v-on:click="onCreateNewLobby" class="min-btn min-btn-blue">
                         Создать <br>
                         комнату
                         <div class="cross"></div>
@@ -26,8 +95,47 @@
             <div class="row" style="height: 75%">
                 <div class="col-sm">
                 </div>
-                <div class="col-sm-9">
-                    <div class="min-block" style="height: 100%;"></div>
+                <div class="col-sm-9 max-height">
+                    <div class="min-block max-height" style="overflow-y: scroll;">
+                        <div class="container pdg-5 text-15">
+
+                            <div class="row mrg-5" v-for="item in lobbyList">
+                                <div class="col-sm"></div>
+                                <div class="col-sm-4">                                   
+                                    <label class="vertical-center"><b><ins>{{ item.name }}</ins></b></label>                                   
+                                </div>
+                                <div class="col-sm-1">
+                                    <div v-bind:style="{ background: (item.isPrivate ? 'var(--red-col)' : 'var(--gold-col)') }" class="min-block min-block-40 vertical-center">
+                                        <svg style="margin-left: 1px;" v-if="item.isPrivate" xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-lock" viewBox="0 0 16 16">
+                                            <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2zM5 8h6a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z" />
+                                        </svg>
+                                        <svg style="margin-left: 2px;" v-else xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-unlock" viewBox="0 0 16 16">
+                                            <path d="M11 1a2 2 0 0 0-2 2v4a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h5V3a3 3 0 0 1 6 0v4a.5.5 0 0 1-1 0V3a2 2 0 0 0-2-2zM3 8a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1H3z" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="col-sm lobby-users-count">
+                                    <div v-bind:style="{ background: (item.playersCount == 8 ? 'var(--red-col)' : 'var(--blue-col)') }" class="min-block min-block-40 vertical-center">
+                                        <svg style="margin-left: 1px;" xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-person" viewBox="0 0 16 16">
+                                            <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z" />
+                                        </svg>
+                                    </div>
+                                    <label>{{ item.playersCount }}/8</label>
+                                </div>
+                                <div class="col-sm-1">
+                                    <button class="min-btn min-btn-gold min-btn-45 mrg-10">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-plug" viewBox="0 0 16 16">
+                                            <path d="M6 0a.5.5 0 0 1 .5.5V3h3V.5a.5.5 0 0 1 1 0V3h1a.5.5 0 0 1 .5.5v3A3.5 3.5 0 0 1 8.5 10c-.002.434-.01.845-.04 1.22-.041.514-.126 1.003-.317 1.424a2.083 2.083 0 0 1-.97 1.028C6.725 13.9 6.169 14 5.5 14c-.998 0-1.61.33-1.974.718A1.922 1.922 0 0 0 3 16H2c0-.616.232-1.367.797-1.968C3.374 13.42 4.261 13 5.5 13c.581 0 .962-.088 1.218-.219.241-.123.4-.3.514-.55.121-.266.193-.621.23-1.09.027-.34.035-.718.037-1.141A3.5 3.5 0 0 1 4 6.5v-3a.5.5 0 0 1 .5-.5h1V.5A.5.5 0 0 1 6 0zM5 4v2.5A2.5 2.5 0 0 0 7.5 9h1A2.5 2.5 0 0 0 11 6.5V4H5z" />
+                                        </svg>
+                                        <div class="cross"></div>
+                                    </button>
+                                </div>
+                                <div class="col-sm">
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
                 </div>
                 <div class="col-sm">
                 </div>
@@ -41,11 +149,59 @@
         template: '#hub',
         data: function () {
             return {
-
+                isShowLobbyCreater: false,
+                lobby: {
+                    name: null,
+                    isPrivate: false,
+                    password: null
+                },
+                roomsHub: null,
+                lobbyList: []
             }
+        },
+        mounted() {
+            var hubConnection = app.createHubConnection('/hub/rooms');
+
+            this.roomsHub = hubConnection;
+
+            hubConnection.on('GoToLobby', this.goToLobby);
+            hubConnection.on('RemoveLobby', this.removeLobby);
+            hubConnection.on('AddLobby', this.addLobby);
+            hubConnection.on('InitLobbyList', this.initLobbyList);
+
+            hubConnection.start();
         },        
         methods: {
-            test: function () {
+            onOkLobbyCreater: function () {
+                this.roomsHub.invoke("CreateNewLobby", this.lobby);
+            },
+            onPrivateClick: function () {
+                this.lobby.isPrivate = !this.lobby.isPrivate;
+            },
+            onLobbyCreaterCloseClick: function () {
+                this.isShowLobbyCreater = false;
+            },
+            removeLobby: function (id) {
+                var i = this.lobbyList.findIndex(x => x.id == id);
+                if (i > -1) {
+                    this.lobbyList.splice(i, 1);
+                }
+            },
+            addLobby: function (lobby) {
+                this.lobbyList.push(lobby);
+            },
+            goToLobby: function (id) {
+                alert('переход ту ду')
+            },
+            initLobbyList: function (rooms) {
+                for (var i in rooms) {
+                    this.lobbyList.push(rooms[i]);
+                }
+            },
+            onCreateNewLobby: function () {
+                this.isShowLobbyCreater = true;                
+            },
+            onRandomLobby: function () {
 
             }
         }
