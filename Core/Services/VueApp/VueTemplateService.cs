@@ -32,9 +32,9 @@ namespace Core.Services.VueApp
         }
 
         public bool TemplateExist(string normalizeTemplateName)
-        {
-            var componentPath = $"{Env.ContentRootPath}\\Views\\{VueDir}\\{normalizeTemplateName}.cshtml";
-            
+        {            
+            var componentPath = Path.GetFullPath($"{Env.ContentRootPath}/Views/{VueDir}/{normalizeTemplateName}.cshtml");
+
             lock (Locker)
             {
                 if (Cache.Contains(normalizeTemplateName))

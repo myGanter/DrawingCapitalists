@@ -2,6 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
+    <RazorCompileOnPublish>false</RazorCompileOnPublish>
+    <UserSecretsId>6dba3909-b2be-4878-b123-73a93786c850</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
