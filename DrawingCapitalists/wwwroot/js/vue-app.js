@@ -2,11 +2,13 @@
     el: '#app',
     data: {
         views: [],
-        currentView: null
+        currentView: null,
+        alerts: []
     },
     mounted() {
         window.addEventListener('popstate', e => {
-            console.log(e);
+            var pathName = this.getLocation();
+            this.switchPage(pathName);
         });
     },
     methods: {
@@ -68,27 +70,60 @@
             var str = "";
 
             for (var i = 0; i < data.messages.length; ++i) {                
-                str += data.messages[i] + "\n";
+                str += data.messages[i] + "<br>";
             }
 
-            if (data.messageType == 0)
-                this.showCommonMessage(str);
-            else if (data.messageType == 1)
-                this.showErrorMessage(str);
-            else if (data.messageType == 2)
-                this.showSuccessMessage(str);
-        },
-        showErrorMessage: function (str) { //messageType = 1
-            alert("Error " + str);
-        },
-        showSuccessMessage: function (str) { //messageType = 2
-            alert("Success " + str);
+            this.addAlert(str, data.messageType);
         },
         showCommonMessage: function (str) { //messageType = 0
-            alert("Common " + str);
+            this.addAlert(str, 0);
+        },
+        showErrorMessage: function (str) { //messageType = 1
+            this.addAlert(str, 1);
+        },
+        showSuccessMessage: function (str) { //messageType = 2
+            this.addAlert(str, 2);
+        },
+        addAlert: function (str, alertType) {
+            var obj = {
+                message: str,
+                mtype: alertType 
+            };
+
+            this.alerts.push(obj);
+
+            setTimeout(() => {
+                this.removeAlert(obj);
+            }, 10000);
+        },
+        removeAlert: function (obj) {
+            var i = this.alerts.indexOf(obj);
+            if (i > -1)
+                this.alerts.splice(i, 1);
+        },
+        getColorForMType: function (mtype) {
+            if (mtype == 0)
+                return 'var(--blue-col)';
+            else if (mtype == 1)
+                return 'var(--red-col)';
+            else if (mtype == 2)
+                return 'var(--gold-col)';
         },
         setLocation: function (page) {
-            history.pushState(null, null, '/' + page);
+            var curPathName = this.getLocation();
+            if (curPathName != page)
+                history.pushState(null, null, '/' + page);
+        },
+        getLocation: function () {
+            var pathName = window.location.pathname;
+            if (pathName.length > 1) {
+                pathName = pathName.substring(1, pathName.length).split('?')[0];
+            }
+            else {
+                pathName = '';
+            }
+
+            return pathName;
         },
         createHubConnection: function (url) {
             var hubConnection = new signalR.HubConnectionBuilder()

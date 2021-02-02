@@ -236,15 +236,15 @@
                             app.httpPost('/Authentication/SetAvatar',
                                 { base64Ava: this.base64Ava },
                                 avResponse => {
-                                    app.switchPage("Hub");
+                                    app.switchPage("hub");
                                 },
                                 ex => {
                                     app.showErrorMessage("Недостаточно прав, возможно стоит проверить куки");
-                                    app.switchPage("Login");
+                                    app.switchPage("login");
                                 });
                         }
                         else {
-                            app.switchPage("Hub");
+                            app.switchPage("hub");
                         }
                     });                
             }
