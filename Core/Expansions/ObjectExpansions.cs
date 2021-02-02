@@ -17,12 +17,12 @@ namespace Core.Expansions
 
         public static bool IsNull(this object obj)
         {
-            return obj == null;
+            return obj is null;
         }
 
         public static bool IsNotNull(this object obj)
         {
-            return obj != null;
+            return obj is not null;
         }
 
         public static string JsonSerialize(this object obj)

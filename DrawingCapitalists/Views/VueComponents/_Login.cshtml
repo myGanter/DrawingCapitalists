@@ -68,7 +68,7 @@
 </template>
 
 <script>
-    Vue.component('Login', {
+    Vue.component('login', {
         template: '#login',
         data: function () {
             return {
@@ -231,19 +231,21 @@
 
                 app.httpPost('/Authentication/Login',
                     { fingerPrint: fPrint, name: name },
-                    response => {                        
-
+                    response => {                     
                         if (this.base64Ava != null) {
                             app.httpPost('/Authentication/SetAvatar',
                                 { base64Ava: this.base64Ava },
                                 avResponse => {
                                     app.switchPage("Hub");
+                                },
+                                ex => {
+                                    app.showErrorMessage("Недостаточно прав, возможно стоит проверить куки");
+                                    app.switchPage("Login");
                                 });
                         }
                         else {
                             app.switchPage("Hub");
                         }
-
                     });                
             }
         }        

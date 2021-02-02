@@ -160,10 +160,17 @@ body {
 
 
 /*скролл бар*/
+/*firefox*/
+* { 
+    scrollbar-color: #000000 var(--white-col);
+    scrollbar-width: thin;
+}
+
+/*chrome*/
 ::-webkit-scrollbar-button {
     background-image: url('');
     background-repeat: no-repeat;
-    width: 5px;
+    width: 7px;
     height: 0px;
 }
 

@@ -1,6 +1,10 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using System.Collections.Generic;
+using System.Text;
 using System.IO;
+using System.Linq;
+
+using Core.Expansions;
 
 namespace Core.Services.VueApp
 {
@@ -23,7 +27,16 @@ namespace Core.Services.VueApp
 
         public string NormalizeTemplateName(string templateName)
         {
-            return "_" + templateName;
+            var sb = new StringBuilder();
+            sb.Append('_');
+
+            if (!templateName.IsNullOrEmpty())
+            {
+                sb.Append(char.ToUpper(templateName[0]));
+                sb.Append(templateName.Skip(1).Select(x => char.ToLower(x)).ToArray());
+            }
+
+            return sb.ToString();
         }
 
         public string GetComponentPath(string normalizeTemplateName)

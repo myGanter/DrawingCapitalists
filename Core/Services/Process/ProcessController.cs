@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Threading;
+using Microsoft.Extensions.Logging;
 using Ninject;
 
 using Core.Expansions;
@@ -18,13 +19,17 @@ namespace Core.Services.Process
 
         private readonly Thread WorkThread;
 
+        private readonly DBLogger Logger;
+
         private readonly Dictionary<Type, ProcessInfoContainer> TypeInfo;
 
-        public ProcessController(IKernel di)
+        public ProcessController(IKernel di, DBLogger logger)
         {
             TypeInfo = new Dictionary<Type, ProcessInfoContainer>();
 
             DI = di;
+
+            Logger = logger;
 
             WorkThread = new Thread(ThreadMethod) 
             { 
@@ -48,19 +53,26 @@ namespace Core.Services.Process
 
                 foreach (var i in nonSingleProcs)
                 {
-                    var conf = i.Value;
-
-                    if (conf.NeedToCreateFunc?.Invoke() == false)
-                        continue;
-
-                    var interval = DateTime.Now - conf.LastTimeStart;
-                    if (interval > conf.Conf.GetTimeSpan)
+                    try
                     {
-                        var proc = (IProcess)DI.Get(i.Key);
-                        proc.RunAsync().ContinueWith(x => proc.Dispose());
+                        var conf = i.Value;
 
-                        conf.LastTimeStart = DateTime.Now;
-                    }                    
+                        if (conf.NeedToCreateFunc?.Invoke() == false)
+                            continue;
+
+                        var interval = DateTime.Now - conf.LastTimeStart;
+                        if (interval > conf.Conf.GetTimeSpan)
+                        {
+                            var proc = (IProcess)DI.Get(i.Key);
+                            proc.RunAsync().ContinueWith(x => proc.Dispose());
+
+                            conf.LastTimeStart = DateTime.Now;
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.WriteLog(LogLevel.Error, i, e, (o, e) => $"Type = {o.Key.FullName}", "ProcessController");
+                    }                                      
                 }
 
                 Thread.Sleep(16);

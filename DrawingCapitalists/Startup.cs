@@ -24,6 +24,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Core.Services.Hubs;
 using Microsoft.AspNetCore.SignalR;
 using Core.Services.AppState;
+using Core.Services;
 
 namespace DrawingCapitalists
 {
@@ -68,6 +69,8 @@ namespace DrawingCapitalists
             var appObjects = new AppObjects();
             services.AddSingleton(appObjects);
             diConf.AddTypeConfig(c => c.Bind<AppObjects>().ToConstant(appObjects));
+
+            diConf.AddTypeConfig(c => c.Bind<DBLogger>().To<DBLogger>());
 
             services.AddSingleton<IKernel>(sp => new StandardKernel(diConf));
         }

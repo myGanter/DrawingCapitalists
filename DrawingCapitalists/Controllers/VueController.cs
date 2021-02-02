@@ -46,7 +46,7 @@ namespace DrawingCapitalists.Controllers
                     if (useLayout)
                         return View(new VueConfig()
                         {
-                            FirstPage = page.IsNullOrEmpty() ? "Hub" : page
+                            FirstPage = page.IsNullOrEmpty() ? "hub" : page
                         }); 
 
                     var normPageName = TemplateService.NormalizeTemplateName(page);
@@ -65,12 +65,15 @@ namespace DrawingCapitalists.Controllers
                 }
                 else if (!page.IsNullOrEmpty() && !useLayout)
                 {
-                    return PartialView(TemplateService.GetComponentPath("_Login"));
+                    if (page.ToLower() == "login")
+                        return PartialView(TemplateService.GetComponentPath("_Login"));
+                    else
+                        return GetBadResult("Недостаточно прав, возможно стоит проверить куки");                    
                 }
 
                 return View(new VueConfig() 
                 {
-                    FirstPage = "Login"
+                    FirstPage = "login"
                 });
             });            
         }
