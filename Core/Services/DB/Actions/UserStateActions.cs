@@ -18,6 +18,11 @@ namespace Core.Services.DB.Actions
             return await Context.UserStates.FirstOrDefaultAsync(x => x.Name == name && x.FingerPrint == fingerPrint);            
         }
 
+        public async Task<UserState> GetAsyncIncludeUserConfigure(string name, string fingerPrint)
+        {
+            return await Context.UserStates.Include(x => x.UserConfigure).FirstOrDefaultAsync(x => x.Name == name && x.FingerPrint == fingerPrint);
+        }
+
         public async Task AddAsync(UserState userState)
         {
             await Context.UserStates.AddAsync(userState);

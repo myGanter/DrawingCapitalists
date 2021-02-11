@@ -13,7 +13,6 @@ using Ninject;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Http;
 
-using Core.Services.VueApp;
 using Core.Services.DB;
 using Core.Services.DB.MsSql;
 using Core.Services.DB.Actions;
@@ -25,6 +24,7 @@ using Core.Services.Hubs;
 using Microsoft.AspNetCore.SignalR;
 using Core.Services.AppState;
 using Core.Services;
+using DrawingCapitalists.Services;
 
 namespace DrawingCapitalists
 {
@@ -56,13 +56,19 @@ namespace DrawingCapitalists
                 .UseSqlServer(dbConnection)
                 .Options)));
 
-            services.AddControllersWithViews().AddRazorRuntimeCompilation(); 
+            services.AddControllersWithViews().AddRazorRuntimeCompilation();
+
+            services.AddHttpContextAccessor();
 
             services.AddSignalR();
 
             services.AddSingleton<IUserIdProvider, UserIdPrivider>();
 
             services.AddScoped<ActionsBuilder>();
+
+            services.AddTransient<HttpQueryParamsService>();
+
+            services.AddTransient<VueModelCreatorService>();
 
             services.AddSingleton<VueTemplateService>();
 
@@ -109,6 +115,7 @@ namespace DrawingCapitalists
                     pattern: "{controller}/{action=Index}");
 
                 endpoints.MapHub<RoomsHub>("/hub/rooms");
+                endpoints.MapHub<GameHub>("/hub/room");
             });
            
             //init db

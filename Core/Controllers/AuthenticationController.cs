@@ -111,7 +111,7 @@ namespace Core.Controllers
         [RequestSizeLimit(2097152)]
         [Authorize]
         [HttpPost]
-        public async Task<IActionResult> SetAvatar([FromBody] AvatarDTO ava)
+        public async Task<IActionResult> SetAvatar([FromBody] UserInfoDTO ava)
         {
             return await TryCatchLogAsync(async () =>
             {
@@ -139,13 +139,19 @@ namespace Core.Controllers
             });
         }
 
-        public async Task<IActionResult> Test()
+        [HttpGet]
+        public async Task<IActionResult> GetUserInfo()
         {
-            var user = GetUser();
-            var h = await DBContext.UserStates.Include(x => x.UserConfigure).FirstOrDefaultAsync(x => x.Name == user.Name && x.FingerPrint == user.FingerPrint);
-            var h2 = await DBContext.UserConfigures.Include(x => x.UserState).ToListAsync();
+            return await TryCatchLogAsync(async () => 
+            {
+                var user = GetUser();
+                var userInfo = await Builder.GetUserStateActions.GetAsyncIncludeUserConfigure(user.Name, user.FingerPrint);
 
-            return Ok();
+                if (userInfo.IsNotNull())
+                    return Json(new UserInfoDTO() { Name = userInfo.Name, Base64Ava = userInfo.UserConfigure?.Base64Ava });
+                
+                return Json(new UserInfoDTO());
+            });            
         }
     }
 }

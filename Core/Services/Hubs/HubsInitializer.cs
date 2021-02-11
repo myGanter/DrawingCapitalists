@@ -15,6 +15,9 @@ namespace Core.Services.Hubs
         {
             var roomsHubContext = serviceProvider.GetService<IHubContext<RoomsHub>>();
             RoomsHub.SetHubContext(roomsHubContext);
+
+            var gameHubContext = serviceProvider.GetService<IHubContext<GameHub>>();
+            GameHub.SetHubContext(gameHubContext);
         }
     }
 }

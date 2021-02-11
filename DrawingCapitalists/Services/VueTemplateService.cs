@@ -6,7 +6,7 @@ using System.Linq;
 
 using Core.Expansions;
 
-namespace Core.Services.VueApp
+namespace DrawingCapitalists.Services
 {
     public class VueTemplateService
     {

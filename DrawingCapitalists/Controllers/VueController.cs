@@ -6,9 +6,9 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using DrawingCapitalists.Services;
 
 using Core.Controllers;
-using Core.Services.VueApp;
 using Core.Services.DB.Actions;
 using Core.Services.DB;
 using Core.Expansions;
@@ -24,12 +24,22 @@ namespace DrawingCapitalists.Controllers
 
         private readonly ActionsBuilder Builder;
 
+        private readonly HttpQueryParamsService HttpQueryParams;
+
+        private readonly VueModelCreatorService VueModelCreator;
+
         private AppDBContext DBContext => Builder.Context;
 
-        public VueController(ILogger<VueController> logger, VueTemplateService templateService, ActionsBuilder builder) : base(logger)
+        public VueController(ILogger<VueController> logger, 
+            VueTemplateService templateService, 
+            ActionsBuilder builder, 
+            HttpQueryParamsService httpQueryParams,
+            VueModelCreatorService vueModelCreator) : base(logger)
         {       
             TemplateService = templateService;
             Builder = builder;
+            HttpQueryParams = httpQueryParams;
+            VueModelCreator = vueModelCreator;
         }        
 
         [HttpGet]
@@ -46,8 +56,8 @@ namespace DrawingCapitalists.Controllers
                     if (useLayout)
                         return View(new VueConfig()
                         {
-                            FirstPage = page.IsNullOrEmpty() ? "hub" : page
-                        }); 
+                            FirstPage = page.IsNullOrEmpty() ? "hub" : $"{page}{HttpQueryParams.GetQueryStr("useLayout")}"
+                        });                                         
 
                     var normPageName = TemplateService.NormalizeTemplateName(page);
                     if (!TemplateService.TemplateExist(normPageName))
@@ -61,7 +71,7 @@ namespace DrawingCapitalists.Controllers
                         return GetBadResult(msg);
                     }
 
-                    return PartialView(TemplateService.GetComponentPath(normPageName));
+                    return PartialView(TemplateService.GetComponentPath(normPageName)/*, VueModelCreator.CreateModelObjectOrNull(normPageName)*/);
                 }
                 else if (!page.IsNullOrEmpty() && !useLayout)
                 {
@@ -75,7 +85,7 @@ namespace DrawingCapitalists.Controllers
                 {
                     FirstPage = "login"
                 });
-            });            
+            }, null);            
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

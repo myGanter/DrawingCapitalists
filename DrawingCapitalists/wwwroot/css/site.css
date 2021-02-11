@@ -4,11 +4,14 @@
 
 :root {
     --red-col: #F78888;
+    --light-red-col: #F3B7C2;
     --gold-col: #F3D250;
+    --light-gold-col: #F9E69D;
     --white-col: #ECECEC;
     --white-shadow-col: #ECECECAA;
     --light-blue-col: #90CCF4;
     --blue-col: #5DA2D5;
+    --light-blue2-col: #C1E3FA;
 }
 
 @font-face {
@@ -18,6 +21,7 @@
 
 html, body, #app {
     height: 100%;
+    overflow-x: hidden;
 }
 
 body {
@@ -45,11 +49,17 @@ body {
     left: 50%;
     transform: translateY(-50%) translateX(-50%);
 }
+.text-center {
+    text-align: center;
+}
 .pdg-10 {
     padding: 10px 0 10px 0;
 }
 .pdg-5 {
     padding: 5px 0 5px 0;
+}
+.pdg-0 {
+    padding: 0;
 }
 .mrg-10 {
     margin: 10px 0 10px 0;
@@ -59,6 +69,9 @@ body {
 }
 .text-15 {
     font-size: 15pt;
+}
+.text-14 {
+    font-size: 14pt;
 }
 
 .hub-panel, .lobby-users-count {
@@ -83,13 +96,101 @@ body {
 }
 
 
+/*svg button*/
+.svg-min-btn svg {
+    -webkit-transition: All 0.1s ease;
+}
+.svg-min-btn svg:hover {
+    transform: scale(1.15);
+}
+.svg-min-btn svg:active {
+    transform: scale(0.85);
+}
+
+
+/*user - меню*/
+#user-menu {
+    position: absolute !important;
+    top: 0;
+    left: 100%;
+    transform: translateX(-100%);
+    padding: 5px;
+    /*display: table;*/
+    text-align: center;
+    background-color: var(--white-shadow-col);
+    -webkit-transition: All .5s;
+}
+#user-menu img {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: 3px dotted var(--red-col);
+}
+#user-menu svg {
+    width: 25px;
+    height: 25px;
+}
+/*#user-menu .menu-ava,*/ #user-menu .btn-menu {
+    border: 2px dotted black;
+    border-right: none;
+    border-top: none;
+    border-bottom: none;
+}
+#user-menu .btn-menu {
+    margin-top: 5px;
+    display: flex;
+    justify-content: flex-end;
+}
+#user-menu .btn-menu > div {
+    margin-left: 7px;
+}
+.show-hide-menu {
+    padding: 0 !important;
+}
+#user-menu .show-hide-menu > div {
+    float: left;
+    position: absolute;
+    bottom: 0;
+}
+
+
+/*задник before*/
+.min-back-rect:before {
+    left: -7px;
+    top: -7px;
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: -2;
+}
+.min-back-rect-red:before {
+    background: var(--red-col);
+}
+.min-back-rect-light-red:before {
+    background: var(--light-red-col);
+}
+.min-back-rect-blue:before {
+    background: var(--blue-col);
+}
+.min-back-rect-light-blue:before {
+    background: var(--light-blue-col);
+}
+.min-back-rect-gold:before {
+    background: var(--gold-col);
+}
+.min-back-rect-light-gold:before {
+    background: var(--light-gold-col);
+}
+
+
 /*оповещения*/
 #alert-container {
     position: absolute;
     top: 0;
     left: 100%;
-    transform: translateX(-100%);
     height: 100%;
+    transform: translateX(-100%);
     font-size: 11pt;
     text-align: center;
 }
@@ -101,15 +202,6 @@ body {
 #alert-container svg {
     width: 25px;
     height: 25px;
-    -webkit-transition: All 0.1s ease;
-}
-#alert-container svg:hover {
-    width: 27px;
-    height: 27px;
-}
-#alert-container svg:active {
-    width: 23px;
-    height: 23px;
 }
 .alert-close-container {
     padding: 0 !important;
@@ -140,6 +232,7 @@ body {
     height: 408px;
     border: 4px dotted var(--light-blue-col);
 }
+
 
 /*vue анимации*/
 .alerts-enter-active, .alerts-leave-active {
@@ -295,21 +388,21 @@ body {
     background: var(--red-col);
 }
 .min-btn-red:hover:before {
-    background: #F3B7C2;
+    background: var(--light-red-col);
 }
 
 .min-btn-gold:before {
     background: var(--gold-col);
 }
 .min-btn-gold:hover:before {
-    background: #F9E69D;
+    background: var(--light-gold-col);
 }
 
 .min-btn-blue:before {
     background: var(--light-blue-col);
 }
 .min-btn-blue:hover:before {
-    background: #C1E3FA;
+    background: var(--light-blue2-col);
 }
 
 
@@ -366,21 +459,21 @@ body {
     background: var(--red-col);
 }
 .min-tbox-red:hover:before, .min-tbox-red:hover:after {
-    background: #F3B7C2;
+    background: var(--light-red-col);
 }
 
 .min-tbox-gold:before, .min-tbox-gold:after {
     background: var(--gold-col);
 }
 .min-tbox-gold:hover:before, .min-tbox-gold:hover:after {
-    background: #F9E69D;
+    background: var(--light-gold-col);
 }
 
 .min-tbox-blue:before, .min-tbox-blue:after {
     background: var(--light-blue-col);
 }
 .min-tbox-blue:hover:before, .min-tbox-blue:hover:after {
-    background: #C1E3FA;
+    background: var(--light-blue2-col);
 }
 
 

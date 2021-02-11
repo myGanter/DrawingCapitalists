@@ -3,20 +3,36 @@
     data: {
         views: [],
         currentView: null,
-        alerts: []
+        alerts: [],
+        menu: {
+            isOpen: false,
+            isShow: false,
+            userName: null,
+            userAva: null
+        },
+        paramsObject: null
     },
     mounted() {
         window.addEventListener('popstate', e => {
             var pathName = this.getLocation();
             this.switchPage(pathName);
         });
+
+        this.httpGet('/Authentication/GetUserInfo',
+            response => {
+                if (response.data) {
+                    var userInfo = response.data;
+                    this.initUserMenuData(userInfo.base64Ava, userInfo.name);
+                }
+            });
     },
     methods: {
         switchPage: function (page) {
-            var normPageName = page.toLowerCase();
+            var normPageName = page.split('?')[0].toLowerCase();
+            var validUrl = page.includes('?') ? page + "&" : page + "?";
 
             if (!this.views.includes(normPageName)) {
-                this.httpGet(`/${page}?useLayout=false`,
+                this.httpGet(`/${validUrl}useLayout=false`,
                     response => {
                         //console.log(response);
                         $("#pages").append(response.data);
@@ -125,14 +141,42 @@
 
             return pathName;
         },
+        getLocationParam: function (param) {
+            var url = new URL(window.location.href);
+            return url.searchParams.get(param);
+        },
         createHubConnection: function (url) {
             var hubConnection = new signalR.HubConnectionBuilder()
                 .withUrl(url)
                 .build();
 
+            hubConnection.on('SwitchPage', this.switchPage);
             hubConnection.on('ShowClientMessage', this.showClientMessage);
 
             return hubConnection;
+        },
+        initUserMenuData: function (ava, name) {
+            this.menu.userAva = ava;
+            this.menu.userName = name;
+        },
+        openCloseUserMenu: function () {
+            this.menu.isOpen = !this.menu.isOpen;
+        },
+        showHideUserMenu: function (show) {
+            this.menu.isShow = show;
+        },
+        onLoginMenuClick: function () {
+            this.menu.isOpen = false;
+            this.menu.isShow = false;
+
+            this.switchPage('login');          
+        },
+        onLobbyMenuClick: function () {
+            this.switchPage('hub');  
+        },
+        isFireFox: function () {
+            var ua = navigator.userAgent;
+            return ua.search(/Firefox/) > 0;
         }
     }
 })

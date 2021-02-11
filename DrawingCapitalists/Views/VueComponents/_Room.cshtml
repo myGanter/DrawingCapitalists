@@ -1,0 +1,145 @@
+﻿
+<template id="room">
+    <div class="max-height">
+        <minwindow v-bind:is-open="isShowPaswdWindow">
+            <div class="container">
+                <div class="row">
+                    <div class="col-sm-2">
+                    </div>
+                    <div class="col-sm">
+                        <h5 class="text-center"><b>Введите пароль</b></h5>
+                    </div>
+                    <div class="col-sm-2">
+                    </div>
+                </div>
+                <div class="row mrg-10">
+                    <div class="col-sm-2">
+                    </div>
+                    <div class="col-sm">
+                        <div class="min-tbox min-tbox-gold mrg-10">
+                            <input v-model="passwd" type="text" placeholder="***" />
+                        </div>
+                    </div>
+                    <div class="col-sm-2">
+                    </div>
+                </div>
+                <div class="row mrg-10">
+                    <div class="col-sm">
+                    </div>
+                    <div class="col-sm">
+                        <button v-on:click="onOkPaswdWindow" class="min-btn min-btn-blue mrg-10 horizontal-center">
+                            Окей
+                            <div class="cross"></div>
+                        </button>
+                    </div>
+                    <div class="col-sm">
+                    </div>
+                </div>
+            </div>
+        </minwindow>
+
+        игра {{gameId}} {{gameInfo}}
+
+        <ul id="example-1">
+            <li v-for="item in users">
+                {{ item }}
+            </li>
+        </ul>
+    </div>
+</template>
+
+<script>
+    Vue.component('room', {
+        template: '#room',
+        data: function () {
+            return {
+                gameId: 0,
+                gameInfo: null,
+                passwd: null,
+                isShowPaswdWindow: false,
+                roomHub: null,
+                users: []
+            }
+        },
+        async mounted() {
+            app.showHideUserMenu(true);
+
+            if (!this.initData())
+                return;
+
+            var hubConnection = app.createHubConnection('/hub/room');
+            this.roomHub = hubConnection;
+
+            hubConnection.on('InitGameInfo', this.initGameInfo); 
+            hubConnection.on('ClosePasswdWindow', this.closePasswdWindow);
+            hubConnection.on('AddUser', this.addUser);
+            hubConnection.on('RemoveUser', this.removeUser);
+            hubConnection.on('InitUsersList', this.initUsersList);
+            hubConnection.on('GetAllUsersInRoom', this.getAllUsersInRoom);            
+
+            await hubConnection.start();
+
+            await this.connectToGame();
+        },
+        destroyed() {            
+            setTimeout(() => this.roomHub.stop(), 100);     
+        },
+        methods: {
+            initData: function () {
+                var id = parseInt(app.getLocationParam('id'));
+
+                if (isNaN(id) || id < 1) {
+                    app.showErrorMessage("Такой комнаты не существует");
+                    app.switchPage("hub");
+                    return false;
+                }
+
+                this.gameId = id;
+                return true;
+            },
+            connectToGame: async function () {
+                await this.roomHub.invoke("GetGameInfo", this.gameId);
+
+                if (this.gameInfo == null)
+                    return;
+
+                if (this.gameInfo.isPrivate) {
+                    if (app.paramsObject) {
+                        await this.roomHub.invoke("Connect", { id: this.gameId, obj: app.paramsObject });
+                        app.paramsObject = null;
+                    }
+                    else
+                        this.isShowPaswdWindow = true;
+                }
+                else
+                    await this.roomHub.invoke("Connect", { id: this.gameId, obj: null });
+            },
+            initGameInfo: function (info) {
+                this.gameInfo = info;
+            },
+            onOkPaswdWindow: function () {
+                this.roomHub.invoke("Connect", { id: this.gameId, obj: this.passwd });
+            },
+            closePasswdWindow: function () {
+                this.isShowPaswdWindow = false;
+            },
+            addUser: function (user) {
+                this.users.push(user);
+            },
+            removeUser: function (user) {
+                var i = this.users.findIndex(x => x.id == user.id);
+                if (i > -1) {
+                    this.users.splice(i, 1);
+                }
+            },
+            initUsersList: function (users) {
+                for (var i in users) {
+                    this.users.push(users[i]);
+                }
+            },
+            getAllUsersInRoom: function () {
+                this.roomHub.invoke("GetAllUsersInRoom", this.gameId);
+            }
+        }
+    })
+</script>

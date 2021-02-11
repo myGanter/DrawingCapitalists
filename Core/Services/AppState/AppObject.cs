@@ -13,15 +13,24 @@ namespace Core.Services.AppState
     {
         public event Action<AppObject, string> OnConnectionAdd;
 
+        public event Action<UserStruct, string> OnConnectionAddOtherData;
+
         public event Action<AppObject, string> OnConnectionRemove;
+
+        public event Action<UserStruct, string> OnConnectionRemoveOtherData;
 
         public long Id { get; set; }
 
         protected readonly Dictionary<UserStruct, string> UsersCache;
 
+        protected readonly DictionaryKeyKey<UserStruct?, long?> UserIdCache;
+        protected long UserIdCounter;
+
         public AppObject()
         {
             UsersCache = new Dictionary<UserStruct, string>();
+            UserIdCache = new DictionaryKeyKey<UserStruct?, long?>();
+            UserIdCounter = 0;
         }
 
         public int Count => UsersCache.Count;
@@ -38,13 +47,34 @@ namespace Core.Services.AppState
                 var past = UsersCache[user];
 
                 if (past.IsNotNull())
+                {
                     OnConnectionRemove?.Invoke(this, past);
+                    OnConnectionRemoveOtherData?.Invoke(user, past);
+                }
 
                 UsersCache[user] = value;
 
                 if (value.IsNotNull())
+                {
                     OnConnectionAdd?.Invoke(this, value);
+                    OnConnectionAddOtherData?.Invoke(user, value);
+                }
             }
+        }
+
+        public long? GetId(UserStruct user)
+        {
+            return UserIdCache[user];
+        }
+
+        public UserStruct? GetUser(long id)
+        {
+            return UserIdCache[id];
+        }
+
+        public bool ContainsUser(UserStruct user)
+        {
+            return UsersCache.ContainsKey(user);
         }
 
         public void AddUser(UserStruct user, string connection)
@@ -52,10 +82,16 @@ namespace Core.Services.AppState
             lock (UsersCache)
             {
                 UsersCache.Add(user, connection);
+
+                UserIdCounter++;
+                UserIdCache.Add(user, UserIdCounter);
             }
 
             if (connection.IsNotNull())
+            {
                 OnConnectionAdd?.Invoke(this, connection);
+                OnConnectionAddOtherData?.Invoke(user, connection);
+            }
         }
 
         public void RemoveUser(UserStruct user)
@@ -65,10 +101,15 @@ namespace Core.Services.AppState
             lock (UsersCache)
             {
                 UsersCache.Remove(user);
+
+                UserIdCache.Remove(user);
             }
 
             if (connection.IsNotNull())
+            {
                 OnConnectionRemove?.Invoke(this, connection);
+                OnConnectionRemoveOtherData?.Invoke(user, connection);
+            }
         }
 
         public abstract bool IsEmpty();

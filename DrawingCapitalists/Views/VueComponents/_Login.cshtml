@@ -86,6 +86,8 @@
             }
         },
         mounted() {
+            app.showHideUserMenu(false);
+
             $("#file-input").off();
             $("#file-input").on("change", (evt) => {
                 var el = evt.target;
@@ -237,6 +239,7 @@
                                 { base64Ava: this.base64Ava },
                                 avResponse => {
                                     app.switchPage("hub");
+                                    app.initUserMenuData(this.base64Ava, name);
                                 },
                                 ex => {
                                     app.showErrorMessage("Недостаточно прав, возможно стоит проверить куки");
@@ -245,6 +248,7 @@
                         }
                         else {
                             app.switchPage("hub");
+                            app.initUserMenuData(null, name);
                         }
                     });                
             }

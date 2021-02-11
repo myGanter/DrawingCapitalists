@@ -9,7 +9,7 @@ using Core.Services.AppState;
 
 namespace Core.Services.Process
 {
-    [ProcessConfig(Mode = StartMode.Restartable, IntervalMinutes = 1)]
+    [ProcessConfig(Mode = StartMode.Restartable, IntervalMinutes = 15)]//IntervalMinutes = 5
     public class AppObjectsProcess : IProcess
     {
         protected readonly AppObjects Objects;

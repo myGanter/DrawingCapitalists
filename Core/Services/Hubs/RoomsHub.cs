@@ -29,28 +29,31 @@ namespace Core.Services.Hubs
 
         public async Task CreateNewLobby(CreateLobbyInfo lobbyInfo)
         {
-            var modelErrors = GetModelErrorsOrNull(lobbyInfo);
-            if (modelErrors.IsNotNull())
+            await TryCatchLogAsync(async () => 
             {
-                await ReturnClientMessage(modelErrors);
-                return;
-            }
+                var modelErrors = GetModelErrorsOrNull(lobbyInfo);
+                if (modelErrors.IsNotNull())
+                {
+                    await ReturnClientMessage(modelErrors);
+                    return;
+                }
 
-            var lobby = new Lobby(lobbyInfo);
-            var id = Objects.AddObject(lobby);
-            var us = GetUser();
-            lobby.AddUser(us.CreateUserStruct(), null);
-            var vueLobbyInfo = lobby.GetVueLobbyInfo();
+                var room = new GameRoom(lobbyInfo);
+                var id = Objects.AddObject(room);
+                var us = GetUser();
+                room.AddUser(us.CreateUserStruct(), null);
+                var vueLobbyInfo = room.GetVueLobbyInfo();
 
-            await Clients.Others.SendAsync("AddLobby", vueLobbyInfo);
-            await Clients.Caller.SendAsync("GoToLobby", id);
+                await Clients.Others.SendAsync("AddLobby", vueLobbyInfo);
+                await Clients.Caller.SendAsync("GoToLobby", new { Id = id, Password = lobbyInfo.Password } );
+            });            
         }
 
         public override async Task OnConnectedAsync()
         {
             var rooms = Objects
-                .Where(x => x.Value is Lobby)
-                .Select(x => (x.Value as Lobby).GetVueLobbyInfo())
+                .Where(x => x.Value is GameRoom)
+                .Select(x => (x.Value as GameRoom).GetVueLobbyInfo())
                 .ToList();
 
             await Clients.Caller.SendAsync("InitLobbyList", rooms);

@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 using Core.Models;
 using Core.Expansions;
+using Core.Exceptions;
 using Core.Services.Authentication;
 using System.Security.Claims;
 
@@ -32,7 +33,7 @@ namespace Core.Controllers
             {
                 LogForTryCatch(e);
 
-                return GetBadResult(msg ?? e.Message);
+                return GetBadResult(msg.IsNull() ? e is ClientException ? e.Message : "Ошибка :c" : msg);
             }
         }
 
@@ -46,15 +47,17 @@ namespace Core.Controllers
             {
                 LogForTryCatch(e);
 
-                return GetBadResult(msg ?? e.Message);
+                return GetBadResult(msg.IsNull() ? e is ClientException ? e.Message : "Ошибка :c" : msg);
             }
         }      
         
         private void LogForTryCatch(Exception e)
-        {            
+        {
+            var loggerT = Logger.GetType();
+
             Logger.WriteLog(LogLevel.Error, GetUser().CreateContainer(null, GetRequestId()), e, 
                 (u, ex) => HttpContext.Request.Host + HttpContext.Request.Path, //url
-                "BaseController.TryCatchLogAsync");
+                loggerT.IsGenericType ? $"{loggerT.GetGenericArguments()[0].Name}.???.TryCatchLogAsync" : "BaseController.TryCatchLogAsync");
         }
 
         protected string GetRequestId() 

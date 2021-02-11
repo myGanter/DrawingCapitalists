@@ -10,6 +10,7 @@ using Core.Expansions;
 using Core.Models;
 using Core.Services.Authentication;
 using Core.Services.AppState;
+using Core.Exceptions;
 
 namespace Core.Services.Hubs
 {
@@ -60,6 +61,29 @@ namespace Core.Services.Hubs
         protected async Task ReturnClientMessage(ClientMessage message)
         {
             await Clients.Caller.SendAsync("ShowClientMessage", message);
+        }
+
+        protected async Task SwitchClientPage(string page)
+        {
+            await Clients.Caller.SendAsync("SwitchPage", page);
+        }
+
+        protected async Task TryCatchLogAsync(Func<Task> clbk, string msg = "Ошибка :c")
+        {
+            try
+            {
+                await clbk();
+            }
+            catch (Exception e)
+            {
+                var loggerT = Logger.GetType();
+
+                Logger.WriteLog(LogLevel.Error, GetUser().CreateContainer(null, Context.ConnectionId), e,
+                    (u, ex) => "",
+                     loggerT.IsGenericType ? $"{loggerT.GetGenericArguments()[0].Name}.???.TryCatchLogAsync" : "BaseHub.TryCatchLogAsync");
+
+                await ReturnClientMessage(new ClientMessage(ClientMessageType.Error, msg.IsNull() ? e is ClientException ? e.Message : "Ошибка :c" : msg));
+            }
         }
 
         //public override async Task OnConnectedAsync()

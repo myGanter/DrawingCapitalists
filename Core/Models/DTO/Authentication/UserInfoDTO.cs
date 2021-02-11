@@ -5,8 +5,10 @@ using System.Threading.Tasks;
 
 namespace Core.Models.DTO.Authentication
 {
-    public class AvatarDTO
+    public class UserInfoDTO
     {
+        public string Name { get; set; }
+
         public string Base64Ava { get; set; }
     }
 }
