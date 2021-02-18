@@ -46,13 +46,13 @@ namespace Core.Services.AppState
             {
                 var past = UsersCache[user];
 
+                UsersCache[user] = value;
+
                 if (past.IsNotNull())
                 {
                     OnConnectionRemove?.Invoke(this, past);
                     OnConnectionRemoveOtherData?.Invoke(user, past);
-                }
-
-                UsersCache[user] = value;
+                }                                
 
                 if (value.IsNotNull())
                 {

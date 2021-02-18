@@ -90,16 +90,16 @@
 
             $("#file-input").off();
             $("#file-input").on("change", (evt) => {
-                var el = evt.target;
+                let el = evt.target;
 
                 if (el.files != null && el.files.length > 0) {
-                    var file = el.files[0];
+                    let file = el.files[0];
 
-                    var reader = new FileReader();
+                    let reader = new FileReader();
                     reader.onload = () => {                        
-                        var dataURL = reader.result;
+                        let dataURL = reader.result;
 
-                        var loadImg = new Image();
+                        let loadImg = new Image();
                         loadImg.onload = () => {
 
                             this.avaEditorImg = new Image();
@@ -125,10 +125,10 @@
         },
         methods: {
             drawImgOnCanvas: function (x, y) {
-                var g = this.cnvContext;
-                var img = this.avaEditorImg;
-                var w = img.width;
-                var h = img.height;                
+                let g = this.cnvContext;
+                let img = this.avaEditorImg;
+                let w = img.width;
+                let h = img.height;                
 
                 g.clearRect(0, 0, 400, 400);
 
@@ -140,11 +140,11 @@
                 }                
             },
             getScaleImg: function (img) {
-                var w = img.width;
-                var h = img.height;
-                var nw = 0;
-                var nh = 0;
-                var canvas = document.createElement('canvas');
+                let w = img.width;
+                let h = img.height;
+                let nw = 0;
+                let nh = 0;
+                let canvas = document.createElement('canvas');
                 if (w > h) {
                     nh = 400;
                     nw = Math.round(w * nh / h);
@@ -157,16 +157,16 @@
                 canvas.width = nw;
                 canvas.height = nh;
 
-                var ctx = canvas.getContext('2d');
+                let ctx = canvas.getContext('2d');
                 ctx.drawImage(img, 0, 0, nw, nh);
 
-                var data = canvas.toDataURL();
+                let data = canvas.toDataURL();
 
                 return data;
             },
             onOkAvaEditor: function () {
 
-                var data = this.canvas.toDataURL();
+                let data = this.canvas.toDataURL();
                 this.base64Ava = data;
                 this.isShowAvaEditor = false;
             },
@@ -178,13 +178,13 @@
             onCanvasMove: function (e) {
                 if (this.isCanvasMouseDown) {
 
-                    var img = this.avaEditorImg;
-                    var w = img.width;
-                    var h = img.height;   
-                    var x = e.offsetX;
-                    var y = e.offsetY;
-                    var offx = this.pastX - x;
-                    var offy = this.pastY - y;
+                    let img = this.avaEditorImg;
+                    let w = img.width;
+                    let h = img.height;   
+                    let x = e.offsetX;
+                    let y = e.offsetY;
+                    let offx = this.pastX - x;
+                    let offy = this.pastY - y;
 
                     if (w / 2 + 200 + Math.abs(this.countX + offx) < w ||
                         h / 2 + 200 + Math.abs(this.countY + offy) < h) {
@@ -212,24 +212,24 @@
                 this.countX = 0;
                 this.countY = 0;
 
-                var fileInput = $("#file-input");
+                let fileInput = $("#file-input");
                 fileInput.val(null);
                 fileInput.click();
             },
             getFingerPrint: function () {
-                var fp = new Fingerprint({
+                let fp = new Fingerprint({
                     canvas: true,
                     ie_activex: true,
                     screen_resolution: true
                 });
 
-                var uid = fp.get();
+                let uid = fp.get();
 
                 return uid + '';
             },
             onLoginClick: function () {
-                var fPrint = this.getFingerPrint();
-                var name = this.name;
+                let fPrint = this.getFingerPrint();
+                let name = this.name;
 
                 app.httpPost('/Authentication/Login',
                     { fingerPrint: fPrint, name: name },

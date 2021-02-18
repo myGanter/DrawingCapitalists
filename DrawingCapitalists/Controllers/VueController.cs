@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using DrawingCapitalists.Services;
+using Microsoft.AspNetCore.Diagnostics;
 
 using Core.Controllers;
 using Core.Services.DB.Actions;
@@ -91,8 +92,14 @@ namespace DrawingCapitalists.Controllers
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
-            //return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-            return GetBadResult("Произошло что-то очень плохое :c");
+            var exception = HttpContext.Features.Get<IExceptionHandlerFeature>();
+            var requestId = GetRequestId();
+
+            Logger.WriteLog(LogLevel.Error, GetUser().CreateContainer(null, requestId), exception?.Error,
+                (u, ex) => HttpContext.Request.Host + HttpContext.Request.Path, //url
+                "VueController.Error");
+
+            return GetBadResult("Произошло что-то очень плохое :c", $"Id запроса: '{requestId}'");
         }
     }
 }

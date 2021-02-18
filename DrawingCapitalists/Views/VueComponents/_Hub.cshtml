@@ -162,7 +162,7 @@
         async mounted() {
             app.showHideUserMenu(true);
 
-            var hubConnection = app.createHubConnection('/hub/rooms');
+            let hubConnection = app.createHubConnection('/hub/rooms');
 
             this.roomsHub = hubConnection;
 
@@ -170,6 +170,7 @@
             hubConnection.on('RemoveLobby', this.removeLobby);
             hubConnection.on('AddLobby', this.addLobby);
             hubConnection.on('InitLobbyList', this.initLobbyList);
+            hubConnection.on('UpdateLobby', this.updateLobby);            
 
             await hubConnection.start();
         },
@@ -187,7 +188,7 @@
                 this.isShowLobbyCreater = false;
             },
             removeLobby: function (id) {
-                var i = this.lobbyList.findIndex(x => x.id == id);
+                let i = this.lobbyList.findIndex(x => x.id == id);
                 if (i > -1) {
                     this.lobbyList.splice(i, 1);
                 }
@@ -199,8 +200,17 @@
                 app.paramsObject = lobby.password;
                 app.switchPage(`room?id=${lobby.id}`);
             },
+            updateLobby: function (lobby) {
+                let i = this.lobbyList.findIndex(x => x.id == lobby.id);
+                if (i > -1) {
+                    let activeLobby = this.lobbyList[i];
+                    activeLobby.isPrivate = lobby.isPrivate;
+                    activeLobby.name = lobby.name;
+                    activeLobby.playersCount = lobby.playersCount;
+                }
+            },
             initLobbyList: function (rooms) {
-                for (var i in rooms) {
+                for (let i in rooms) {
                     this.lobbyList.push(rooms[i]);
                 }
             },
@@ -208,14 +218,14 @@
                 this.isShowLobbyCreater = true;                
             },
             onRandomLobby: function () {
-                var nonPrivate = this.lobbyList.filter(l => !l.isPrivate);
+                let nonPrivate = this.lobbyList.filter(l => !l.isPrivate);
                 if (nonPrivate.length == 0) {
                     app.showCommonMessage("Нет подходящих комнат, создайте свою собственную");
                     return;
                 }
 
-                var randomIndex = getRandomInt(0, nonPrivate.length);
-                var roomId = nonPrivate[randomIndex].id;
+                let randomIndex = getRandomInt(0, nonPrivate.length);
+                let roomId = nonPrivate[randomIndex].id;
                 app.switchPage(`room?id=${roomId}`);
             },
             onRoomEnter: function (lobby) {

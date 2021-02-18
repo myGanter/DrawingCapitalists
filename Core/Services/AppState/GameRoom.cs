@@ -27,12 +27,14 @@ namespace Core.Services.AppState
         {
             var others = this.Where(x => !x.Key.Equals(user)).Select(x => x.Value);
             GameHub.HubContext.Clients.Clients(others).SendAsync("RemoveUser", new { Id = GetId(user), Name = user.Name });
+            RoomsHub.HubContext.Clients.All.SendAsync("UpdateLobby", GetVueLobbyInfo());
         }
 
         private void GameRoom_OnConnectionAddOtherData(UserStruct user, string connection)
         {
             var others = this.Where(x => !x.Key.Equals(user)).Select(x => x.Value);
             GameHub.HubContext.Clients.Clients(others).SendAsync("AddUser", new { Id = GetId(user), Name = user.Name });
+            RoomsHub.HubContext.Clients.All.SendAsync("UpdateLobby", GetVueLobbyInfo());
         }
 
         public VueLobbyInfo GetVueLobbyInfo()
@@ -42,7 +44,7 @@ namespace Core.Services.AppState
                 Id = Id,
                 IsPrivate = LobbyInfo.IsPrivate,
                 Name = LobbyInfo.Name,
-                PlayersCount = Count
+                PlayersCount = UsersCache.Count(x => x.Value.IsNotNull())
             };
         }
 

@@ -14,22 +14,22 @@
     },
     mounted() {
         window.addEventListener('popstate', e => {
-            var pathName = this.getLocation();
+            let pathName = this.getLocation();
             this.switchPage(pathName);
         });
 
         this.httpGet('/Authentication/GetUserInfo',
             response => {
                 if (response.data) {
-                    var userInfo = response.data;
+                    let userInfo = response.data;
                     this.initUserMenuData(userInfo.base64Ava, userInfo.name);
                 }
             });
     },
     methods: {
         switchPage: function (page) {
-            var normPageName = page.split('?')[0].toLowerCase();
-            var validUrl = page.includes('?') ? page + "&" : page + "?";
+            let normPageName = page.split('?')[0].toLowerCase();
+            let validUrl = page.includes('?') ? page + "&" : page + "?";
 
             if (!this.views.includes(normPageName)) {
                 this.httpGet(`/${validUrl}useLayout=false`,
@@ -83,11 +83,15 @@
                 })
         },
         showClientMessage: function (data) {
-            var str = "";
+            let str = "";
+            let lens = data.messages.length;
 
-            for (var i = 0; i < data.messages.length; ++i) {                
-                str += data.messages[i] + "<br>";
+            for (let i = 0; i < lens - 1; ++i) {                
+                str += data.messages[i] + "<br><br>";
             }
+
+            if (lens > 0)
+                str += data.messages[lens - 1] + "<br>";
 
             this.addAlert(str, data.messageType);
         },
@@ -101,7 +105,7 @@
             this.addAlert(str, 2);
         },
         addAlert: function (str, alertType) {
-            var obj = {
+            let obj = {
                 message: str,
                 mtype: alertType 
             };
@@ -113,7 +117,7 @@
             }, 10000);
         },
         removeAlert: function (obj) {
-            var i = this.alerts.indexOf(obj);
+            let i = this.alerts.indexOf(obj);
             if (i > -1)
                 this.alerts.splice(i, 1);
         },
@@ -126,12 +130,12 @@
                 return 'var(--gold-col)';
         },
         setLocation: function (page) {
-            var curPathName = this.getLocation();
+            let curPathName = this.getLocation();
             if (curPathName != page)
                 history.pushState(null, null, '/' + page);
         },
         getLocation: function () {
-            var pathName = window.location.pathname;
+            let pathName = window.location.pathname;
             if (pathName.length > 1) {
                 pathName = pathName.substring(1, pathName.length).split('?')[0];
             }
@@ -142,11 +146,11 @@
             return pathName;
         },
         getLocationParam: function (param) {
-            var url = new URL(window.location.href);
+            let url = new URL(window.location.href);
             return url.searchParams.get(param);
         },
         createHubConnection: function (url) {
-            var hubConnection = new signalR.HubConnectionBuilder()
+            let hubConnection = new signalR.HubConnectionBuilder()
                 .withUrl(url)
                 .build();
 
@@ -175,7 +179,7 @@
             this.switchPage('hub');  
         },
         isFireFox: function () {
-            var ua = navigator.userAgent;
+            let ua = navigator.userAgent;
             return ua.search(/Firefox/) > 0;
         }
     }
