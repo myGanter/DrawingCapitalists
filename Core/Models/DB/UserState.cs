@@ -24,5 +24,12 @@ namespace Core.Models.DB
         public int? UserConfigureId { get; set; }
 
         public UserConfigure UserConfigure { get; set; }
+
+        public List<WordCollection> WordCollections { get; set; }
+
+        public UserState()
+        {
+            WordCollections = new List<WordCollection>();
+        }
     }
 }

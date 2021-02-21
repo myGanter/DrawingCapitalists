@@ -10,6 +10,8 @@ using System.Threading.Tasks;
 
 using Core.Models;
 using Core.Models.Hubs;
+using Core.Services.DB.Actions;
+using Core.Services.DB;
 
 namespace Core.Services.Hubs
 {
@@ -24,8 +26,13 @@ namespace Core.Services.Hubs
                 HubContext = context;
         }
 
-        public GameHub(ILogger<GameHub> logger, AppObjects objects) : base(logger, objects)
+        private readonly ActionsBuilder Builder;
+
+        private AppDBContext DBContext => Builder.Context;
+
+        public GameHub(ILogger<GameHub> logger, AppObjects objects, ActionsBuilder builder) : base(logger, objects)
         {
+            Builder = builder;
         }
 
         public async Task GetGameInfo(long id)
@@ -78,6 +85,36 @@ namespace Core.Services.Hubs
                 .ToList();
 
                 await Clients.Caller.SendAsync("InitUsersList", users);
+            });
+        }
+
+        public async Task GetUserAva(IdObject<long> obj)
+        {
+            await GetGameRoomObjectOrReturnNotExistOrNonAuth(obj.Id, async gobj =>
+            {
+                var user = gobj.GetUser(obj.Obj);
+
+                if (user.HasValue)
+                {
+                    var userInfo = await Builder.GetUserStateActions.GetAsyncIncludeUserConfigure(user.Value.Name, user.Value.FingerPrint);
+                    if (userInfo.IsNotNull() && userInfo.UserConfigure.IsNotNull())
+                    {
+                        await Clients.Caller.SendAsync("SetUserAva", new { Id = obj.Obj, Ava = userInfo.UserConfigure.Base64Ava });                        
+                    }
+                }
+            });
+        }
+
+        public async Task StartGame(long id)
+        {
+            await GetGameRoomObjectOrReturnNotExistOrNonAuth(id, async gobj =>
+            {
+                var user = GetUser().CreateUserStruct();
+
+                if (gobj.Admin.Key.Equals(user))
+                {
+                    await gobj.GameLogic.SetNextState();
+                }
             });
         }
 

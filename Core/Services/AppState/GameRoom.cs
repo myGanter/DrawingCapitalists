@@ -8,6 +8,7 @@ using Core.Expansions;
 using Core.Services.Hubs;
 using Core.Models.Hubs;
 using Core.Models;
+using Core.Services.Game;
 
 namespace Core.Services.AppState
 {
@@ -15,9 +16,14 @@ namespace Core.Services.AppState
     {
         public readonly CreateLobbyInfo LobbyInfo;
 
+        public readonly GameLogic GameLogic;
+
+        public KeyValuePair<UserStruct, string> Admin { get; private set; }
+
         public GameRoom(CreateLobbyInfo lobbyInfo)
         {
             LobbyInfo = lobbyInfo;
+            GameLogic = new GameLogic(this);
 
             OnConnectionAddOtherData += GameRoom_OnConnectionAddOtherData;
             OnConnectionRemoveOtherData += GameRoom_OnConnectionRemoveOtherData;
@@ -25,16 +31,30 @@ namespace Core.Services.AppState
 
         private void GameRoom_OnConnectionRemoveOtherData(UserStruct user, string connection)
         {
-            var others = this.Where(x => !x.Key.Equals(user)).Select(x => x.Value);
+            var others = GetOthersConnections(user);
             GameHub.HubContext.Clients.Clients(others).SendAsync("RemoveUser", new { Id = GetId(user), Name = user.Name });
             RoomsHub.HubContext.Clients.All.SendAsync("UpdateLobby", GetVueLobbyInfo());
+
+            if (Admin.Value == connection)
+            {
+                Admin = this.Where(x => x.Value.IsNotNull()).FirstOrDefault();
+
+                if (Admin.Value.IsNotNull())
+                    GameHub.HubContext.Clients.Client(Admin.Value).SendAsync("InstallAsAnAdmin");
+            }
         }
 
         private void GameRoom_OnConnectionAddOtherData(UserStruct user, string connection)
         {
-            var others = this.Where(x => !x.Key.Equals(user)).Select(x => x.Value);
+            var others = GetOthersConnections(user);
             GameHub.HubContext.Clients.Clients(others).SendAsync("AddUser", new { Id = GetId(user), Name = user.Name });
             RoomsHub.HubContext.Clients.All.SendAsync("UpdateLobby", GetVueLobbyInfo());
+
+            if (Admin.Value.IsNull())
+            {
+                Admin = this.Where(x => x.Value.IsNotNull()).FirstOrDefault();
+                GameHub.HubContext.Clients.Client(Admin.Value).SendAsync("InstallAsAnAdmin");
+            }
         }
 
         public VueLobbyInfo GetVueLobbyInfo()

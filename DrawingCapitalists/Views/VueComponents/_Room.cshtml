@@ -1,6 +1,7 @@
 ﻿
 <template id="room">
     <div class="max-height">
+
         <minwindow v-bind:is-open="isShowPaswdWindow">
             <div class="container">
                 <div class="row">
@@ -38,13 +39,33 @@
             </div>
         </minwindow>
 
-        игра {{gameId}} {{gameInfo}}
+        <div class="container vertical-center max-height" style="max-width: none">
+            <div class="row" style="height: 10%">
+                игра {{gameId}} {{gameInfo}}
+            </div>
 
-        <ul id="example-1">
-            <li v-for="item in users">
-                {{ item }}
-            </li>
-        </ul>
+            <div class="row" style="height: 90%">
+                <div class="col-sm-2 left-user-panel test">
+
+                    <div v-for="item in users">
+                        <img v-bind:src="item.userAva == null ? '/images/ava.png' : item.userAva">
+                        <label>{{ item.name }}</label>                        
+                    </div>
+
+                </div>
+                <div class="col-sm">
+                    {{isAdmin}}
+
+                    <button v-on:click="onStartGameBtn" v-if="isAdmin" class="min-btn min-btn-gold">
+                        Начать
+                        <div class="cross"></div>
+                    </button>
+
+                    <h1>Правила игры...</h1>
+                </div>
+            </div>
+        </div>
+
     </div>
 </template>
 
@@ -58,7 +79,8 @@
                 passwd: null,
                 isShowPaswdWindow: false,
                 roomHub: null,
-                users: []
+                users: [],
+                isAdmin: false
             }
         },
         async mounted() {
@@ -75,7 +97,9 @@
             hubConnection.on('AddUser', this.addUser);
             hubConnection.on('RemoveUser', this.removeUser);
             hubConnection.on('InitUsersList', this.initUsersList);
-            hubConnection.on('GetAllUsersInRoom', this.getAllUsersInRoom);            
+            hubConnection.on('GetAllUsersInRoom', this.getAllUsersInRoom);     
+            hubConnection.on('SetUserAva', this.setUserAva);
+            hubConnection.on('InstallAsAnAdmin', this.installAsAnAdmin);            
 
             await hubConnection.start();
 
@@ -114,17 +138,24 @@
                 else
                     await this.roomHub.invoke("Connect", { id: this.gameId, obj: null });
             },
-            initGameInfo: function (info) {
-                this.gameInfo = info;
-            },
             onOkPaswdWindow: function () {
                 this.roomHub.invoke("Connect", { id: this.gameId, obj: this.passwd });
+            },
+            onStartGameBtn: function () {
+                this.roomHub.invoke("StartGame", this.gameId);
+            },
+
+
+            initGameInfo: function (info) {
+                this.gameInfo = info;
             },
             closePasswdWindow: function () {
                 this.isShowPaswdWindow = false;
             },
             addUser: function (user) {
+                user.userAva = null;
                 this.users.push(user);
+                this.roomHub.invoke("GetUserAva", { id: this.gameId, obj: user.id });
             },
             removeUser: function (user) {
                 let i = this.users.findIndex(x => x.id == user.id);
@@ -134,11 +165,17 @@
             },
             initUsersList: function (users) {
                 for (let i in users) {
-                    this.users.push(users[i]);
+                    this.addUser(users[i]);
                 }
+            },
+            setUserAva: function (userAva) {
+                this.users.find(x => x.id == userAva.id).userAva = userAva.ava;
             },
             getAllUsersInRoom: function () {
                 this.roomHub.invoke("GetAllUsersInRoom", this.gameId);
+            },
+            installAsAnAdmin: function () {
+                this.isAdmin = true;
             }
         }
     })

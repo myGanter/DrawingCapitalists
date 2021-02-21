@@ -15,6 +15,10 @@ namespace Core.Services.DB
 
         public DbSet<UserConfigure> UserConfigures { get; set; }
 
+        public DbSet<WordCollection> WordCollections { get; set; }
+
+        public DbSet<Word> Words { get; set; }
+
         public AppDBContext(DbContextOptions options) : base(options)
         { }
     }

@@ -14,5 +14,9 @@ namespace Core.Services.DB
         DbSet<UserState> UserStates { get; set; }
 
         DbSet<UserConfigure> UserConfigures { get; set; }
+
+        DbSet<WordCollection> WordCollections { get; set; }
+
+        DbSet<Word> Words { get; set; }
     }
 }

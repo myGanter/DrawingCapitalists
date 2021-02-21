@@ -108,6 +108,20 @@ body {
 }
 
 
+/*room*/
+.left-user-panel {
+    padding: 0 !important;
+}
+.left-user-panel div {
+    margin: 5px 0;
+}
+.left-user-panel img {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+}
+
+
 /*user - меню*/
 #user-menu {
     position: absolute !important;

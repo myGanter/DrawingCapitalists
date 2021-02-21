@@ -116,6 +116,16 @@ namespace Core.Services.AppState
 
         public abstract Task NotifyDeath();
 
+        public IEnumerable<string> GetOthersConnections(UserStruct user)
+        {
+            return this.Where(x => !x.Key.Equals(user) && x.Value.IsNotNull()).Select(x => x.Value);
+        }
+
+        public IEnumerable<string> GetAllConnections()
+        {
+            return this.Where(x => x.Value.IsNotNull()).Select(x => x.Value);
+        }
+
         public IEnumerator<KeyValuePair<UserStruct, string>> GetEnumerator()
         {
             lock (UsersCache)
