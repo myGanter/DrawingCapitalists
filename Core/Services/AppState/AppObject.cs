@@ -126,6 +126,11 @@ namespace Core.Services.AppState
             return this.Where(x => x.Value.IsNotNull()).Select(x => x.Value);
         }
 
+        public IEnumerable<KeyValuePair<UserStruct, string>> GetAllUsersConnections()
+        {
+            return this.Where(x => x.Value.IsNotNull());
+        }
+
         public IEnumerator<KeyValuePair<UserStruct, string>> GetEnumerator()
         {
             lock (UsersCache)

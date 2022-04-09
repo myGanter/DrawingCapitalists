@@ -12,6 +12,7 @@ using Core.Models;
 using Core.Models.Hubs;
 using Core.Services.DB.Actions;
 using Core.Services.DB;
+using Core.Services.Game;
 
 namespace Core.Services.Hubs
 {
@@ -110,11 +111,67 @@ namespace Core.Services.Hubs
             await GetGameRoomObjectOrReturnNotExistOrNonAuth(id, async gobj =>
             {
                 var user = GetUser().CreateUserStruct();
+                var gameLogic = gobj.GameLogic;
 
-                if (gobj.Admin.Key.Equals(user))
+                if (gobj.Admin.Key.Equals(user) && gameLogic.CurrentGameState == GameState.Waiting)
                 {
-                    await gobj.GameLogic.SetNextState();
+                    var words = await Builder.GetWordsActions.GetWordsFromRandomWordCollectionAsync();
+                    var users = gobj.GetAllUsersConnections().ToList();
+
+                    if (words.Count / 3 <= users.Count)
+                    {
+                        await ReturnClientMessage(new ClientMessage(ClientMessageType.Error, "В паке слишком мало слов для стольких игроков"));
+                        return;
+                    }
+
+                    var rnd = new Random();
+                    var usersWords = new Dictionary<UserStruct, List<string>>();
+                    foreach (var u in users)
+                    {
+                        var wList = new List<string>();
+
+                        for (var i = 0; i < 3; ++i)
+                        {
+                            var wIndex = rnd.Next(words.Count);
+                            var w = words[wIndex];
+                            words.RemoveAt(wIndex);
+                            wList.Add(w.Text);
+                        }
+
+                        usersWords.Add(u.Key, wList);
+                    }
+
+                    gameLogic.UsersWords = usersWords;
+
+                    foreach (var uw in usersWords)
+                    {
+                        var client = gobj[uw.Key];
+                        var wList = uw.Value;
+
+                        await Clients.Client(client).SendAsync("InitWords", wList);
+                    }
+
+                    await gameLogic.SetNextState();
                 }
+            });
+        }
+
+        public async Task ChooseWord(IdObject<string> obj)
+        {
+            await GetGameRoomObjectOrReturnNotExistOrNonAuth(obj.Id, async gobj =>
+            {
+                var gameLogic = gobj.GameLogic;
+
+                if (gameLogic.CurrentGameState == GameState.WordSelection)
+                {
+                    var user = GetUser().CreateUserStruct();
+                    gameLogic.ChooseWord(user, obj.Obj);
+
+                    if (gameLogic.AllUserChooseWors())
+                    {
+                        await gameLogic.SetNextState();
+                    }
+                }                
             });
         }
 

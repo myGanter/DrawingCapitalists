@@ -49,25 +49,69 @@
 
                     <div v-for="item in users">
                         <img v-bind:src="item.userAva == null ? '/images/ava.png' : item.userAva">
-                        <label>{{ item.name }}</label>                        
+                        <label>{{ item.name }}</label>
                     </div>
 
                 </div>
                 <div class="col-sm">
-                    {{isAdmin}}
-
-                    <button v-on:click="onStartGameBtn" v-if="isAdmin" class="min-btn min-btn-gold">
-                        Начать
-                        <div class="cross"></div>
-                    </button>
-
-                    <h1>Правила игры...</h1>
+                    <transition name="component-fade" mode="out-in">
+                        <component v-bind:is="currentState"></component>
+                    </transition>
                 </div>
             </div>
         </div>
 
     </div>
 </template>
+
+
+<template id="waiting">
+    <div class="max-height">
+
+        {{$parent.isAdmin}}
+
+        <button v-on:click="$parent.onStartGameBtn" v-if="$parent.isAdmin" class="min-btn min-btn-gold">
+            Начать игру
+            <div class="cross"></div>
+        </button>
+
+        <h1>Правила игры...</h1>
+
+    </div>
+</template>
+
+
+<template id="word-selection">
+    <div class="max-height">
+
+        <div class="container">
+            <div class="row">
+                <div class="col-sm">
+                    <h1>Выбор слова</h1>
+                </div>
+            </div>
+            <div class="row">
+                <div v-for="item in $parent.words" class="col-sm">
+                    <button v-on:click="$parent.onChooseWord(item)" class="min-btn min-btn-gold">
+                        {{item}}
+                    </button>
+                </div>
+            </div>
+        </div>        
+
+    </div>
+</template>
+
+
+<template id="basic-drawing">
+    <div class="max-height">
+
+        <h1>{{$parent.chooseWord}}</h1>
+        <h1>kek draw</h1>
+
+    </div>
+</template>
+
 
 <script>
     Vue.component('room', {
@@ -80,7 +124,30 @@
                 isShowPaswdWindow: false,
                 roomHub: null,
                 users: [],
-                isAdmin: false
+                isAdmin: false,
+                currentState: 'Waiting',
+                words: [],
+                chooseWord: null
+            }
+        },
+        components: {
+            'Waiting': {
+                template: '#waiting',
+                mounted() {
+                    console.log(this);
+                }
+            },
+            'WordSelection': {
+                template: '#word-selection',
+                mounted() {
+                    console.log(this);
+                }
+            },
+            'BasicDrawing': {
+                template: '#basic-drawing',
+                mounted() {
+                    console.log(this);
+                }
             }
         },
         async mounted() {
@@ -92,21 +159,24 @@
             let hubConnection = app.createHubConnection('/hub/room');
             this.roomHub = hubConnection;
 
-            hubConnection.on('InitGameInfo', this.initGameInfo); 
+            hubConnection.on('InitGameInfo', this.initGameInfo);
             hubConnection.on('ClosePasswdWindow', this.closePasswdWindow);
             hubConnection.on('AddUser', this.addUser);
             hubConnection.on('RemoveUser', this.removeUser);
             hubConnection.on('InitUsersList', this.initUsersList);
-            hubConnection.on('GetAllUsersInRoom', this.getAllUsersInRoom);     
+            hubConnection.on('GetAllUsersInRoom', this.getAllUsersInRoom);
             hubConnection.on('SetUserAva', this.setUserAva);
-            hubConnection.on('InstallAsAnAdmin', this.installAsAnAdmin);            
+            hubConnection.on('InstallAsAnAdmin', this.installAsAnAdmin);
+            hubConnection.on('SetGameState', this.setGameState);
+            hubConnection.on('InitWords', this.initWords);
+            hubConnection.on('SetChooseWord', this.setChooseWord);
 
             await hubConnection.start();
 
             await this.connectToGame();
         },
-        destroyed() {            
-            setTimeout(() => this.roomHub.stop(), 100);     
+        destroyed() {
+            setTimeout(() => this.roomHub.stop(), 100);
         },
         methods: {
             initData: function () {
@@ -144,8 +214,24 @@
             onStartGameBtn: function () {
                 this.roomHub.invoke("StartGame", this.gameId);
             },
+            onChooseWord: function (word) {
+                this.roomHub.invoke("ChooseWord", { id: this.gameId, obj: word });
+            },
 
 
+            setGameState: function (state) {
+                this.currentState = state;
+            },
+            setChooseWord: function (word) {
+                this.chooseWord = word;
+            },
+            initWords: function (words) {
+                this.words.splice(0, this.words.length);
+
+                for (let i in words) {
+                    this.words.push(words[i]);
+                }
+            },
             initGameInfo: function (info) {
                 this.gameInfo = info;
             },

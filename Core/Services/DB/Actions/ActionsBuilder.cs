@@ -28,10 +28,25 @@ namespace Core.Services.DB.Actions
             } 
         }
 
+        private WordsActions _WordsActions;
+        public WordsActions GetWordsActions
+        {
+            get
+            {
+                if (_WordsActions.IsNull())
+                    _WordsActions = new WordsActions(Context, this);
+
+                return _WordsActions;
+            }
+        }
+
         internal void SetNotSaveChangesMode(bool mode)
         {
             if (_UserStateActions.IsNotNull())
                 _UserStateActions.SaveChangesMode = mode;
+
+            if (_WordsActions.IsNotNull())
+                _WordsActions.SaveChangesMode = mode;
         }
     }
 }

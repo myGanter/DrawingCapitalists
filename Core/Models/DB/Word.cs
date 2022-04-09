@@ -11,7 +11,7 @@ namespace Core.Models.DB
 
         public string Text { get; set; }
 
-        public int? WordCollectionId { get; set; }
+        public int WordCollectionId { get; set; }
         public WordCollection WordCollection { get; set; }
     }
 }
